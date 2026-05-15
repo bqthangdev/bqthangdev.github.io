@@ -83,6 +83,17 @@ body {
 
 .theme-icon { font-size: 1rem; flex-shrink: 0; }
 
+.icon-credit {
+  display: block;
+  margin-top: 8px;
+  padding: 0 12px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  line-height: 1.4;
+}
+.icon-credit:hover { text-decoration: underline; color: var(--text); }
+
 .sidebar-header {
   padding: 22px 20px 18px;
   border-bottom: 1px solid var(--border);
@@ -92,6 +103,9 @@ body {
   font-size: 1.1rem;
   font-weight: 700;
   letter-spacing: 0.02em;
+  text-decoration: none;
+  color: var(--text);
+  display: block;
 }
 
 .sidebar-nav {
@@ -114,6 +128,7 @@ body {
   font-size: 0.9rem;
   font-weight: 500;
   text-align: left;
+  text-decoration: none;
   transition: background var(--transition), color var(--transition);
   width: 100%;
 }
@@ -334,6 +349,61 @@ body {
 .result-box::-webkit-scrollbar-thumb,
 .textarea::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
+/* ── About page ──────────────────────────────────────────────── */
+.about-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 48px 32px;
+  text-align: center;
+  max-width: 420px;
+}
+
+.about-avatar {
+  font-size: 3.5rem;
+  line-height: 1;
+}
+
+.about-name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--text);
+}
+
+.about-links {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.about-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.92rem;
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.about-link:hover {
+  border-color: var(--primary);
+  background: var(--bg);
+}
+
+.about-link-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
 /* ── Toast ──────────────────────────────────────────────────── */
 .toast {
   position: fixed;
@@ -370,4 +440,5 @@ body {
   .content { padding: 24px 16px; }
   .stats-row { gap: 8px; }
   .stat-value { font-size: 1.4rem; }
+  .result-actions { flex-wrap: wrap; }
 }

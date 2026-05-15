@@ -4,16 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DevTools</title>
+  <!-- Icon credit: Code icons created by Freepik - Flaticon (https://www.flaticon.com/free-icons/code) -->
   <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="layout">
-    <!-- Sidebar -->
+
+    <!-- ── Sidebar ─────────────────────────────────────────── -->
     <aside class="sidebar">
       <div class="sidebar-header">
         <span class="logo">⚙️ DevTools</span>
       </div>
+
+      <!-- Nav items: data-page phải khớp với id của section bên dưới -->
       <nav class="sidebar-nav">
         <button class="nav-item active" data-page="string-length">
           <span class="nav-icon">📏</span>
@@ -23,26 +27,33 @@
           <span class="nav-icon">🖼️</span>
           <span class="nav-label">Image to Base64</span>
         </button>
+        <button class="nav-item" data-page="about">
+          <span class="nav-icon">👤</span>
+          <span class="nav-label">About</span>
+        </button>
       </nav>
+
       <div class="sidebar-footer">
         <button class="theme-toggle" id="theme-toggle" title="Chuyển giao diện">
           <span class="theme-icon" id="theme-icon">☀️</span>
           <span class="nav-label" id="theme-label">Light mode</span>
         </button>
+        <a class="icon-credit nav-label" href="https://www.flaticon.com/free-icons/code"
+           target="_blank" rel="noopener" title="code icons">Code icons by Freepik – Flaticon</a>
       </div>
     </aside>
 
-    <!-- Main content -->
+    <!-- ── Main content ────────────────────────────────────── -->
     <main class="content">
 
-      <!-- Page: String Length -->
+      <!-- Section: String Length (hiển thị mặc định) -->
       <section class="page active" id="page-string-length">
         <div class="page-header">
           <h1>String Length Checker</h1>
           <p class="page-desc">Paste your string below to check its length.</p>
         </div>
         <div class="card">
-          <div class="stats-row" id="sl-stats">
+          <div class="stats-row">
             <div class="stat-box">
               <span class="stat-value" id="sl-total">0</span>
               <span class="stat-label">Total characters</span>
@@ -73,7 +84,7 @@
         </div>
       </section>
 
-      <!-- Page: Image to Base64 -->
+      <!-- Section: Image to Base64 (ẩn mặc định) -->
       <section class="page" id="page-image-to-base64">
         <div class="page-header">
           <h1>Image to Base64</h1>
@@ -84,20 +95,39 @@
             <input type="file" id="ib-input" accept="image/*" multiple hidden />
             <div class="drop-zone-inner">
               <span class="drop-icon">📂</span>
-              <span class="drop-text">Click or drag & drop images here</span>
+              <span class="drop-text">Click or drag &amp; drop images here</span>
               <span class="drop-hint">Supports PNG, JPG, GIF, WebP, SVG…</span>
             </div>
           </label>
         </div>
-
         <div id="ib-results"></div>
+      </section>
+
+      <!-- Section: About -->
+      <section class="page" id="page-about">
+        <div class="page-header">
+          <h1>About</h1>
+        </div>
+        <div class="card about-card">
+          <div class="about-avatar">👤</div>
+          <h2 class="about-name">BANH QUOC THANG</h2>
+          <div class="about-links">
+            <a class="about-link" href="https://github.com/bqthangdev" target="_blank" rel="noopener">
+              <span class="about-link-icon">🐙</span>
+              <span>github.com/bqthangdev</span>
+            </a>
+            <a class="about-link" href="mailto:bqthang.dev@gmail.com">
+              <span class="about-link-icon">✉️</span>
+              <span>bqthang.dev@gmail.com</span>
+            </a>
+          </div>
+        </div>
       </section>
 
     </main>
   </div>
 
   <div class="toast" id="toast"></div>
-
   <script src="app.js"></script>
 </body>
 </html>
