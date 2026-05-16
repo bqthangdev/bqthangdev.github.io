@@ -150,6 +150,7 @@ body {
 .content {
   margin-left: var(--sidebar-w);
   flex: 1;
+  min-width: 0;   /* cho phép flex item co lại, tránh tràn ngang cả trang */
   padding: 36px 40px;
   min-height: 100vh;
 }
@@ -348,6 +349,114 @@ body {
 .textarea::-webkit-scrollbar-track { background: transparent; }
 .result-box::-webkit-scrollbar-thumb,
 .textarea::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* ── Text Compare ──────────────────────────────────────────────── */
+/* Toolbar: Compare ở giữa, Clear all ở phải */
+.tc-toolbar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.tc-toolbar-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+/* Hai textarea song song */
+.tc-panels {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.tc-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.tc-panel-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.tc-textarea { min-height: 180px; }
+
+/* Dòng tóm tắt kết quả */
+.tc-summary {
+  font-size: 0.88rem;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+.tc-summary-ok   { color: var(--green); }
+.tc-summary-diff { color: var(--red);   }
+
+/* Vùng hiển thị diff side-by-side */
+.tc-result-view {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: auto;
+  max-height: 440px;
+  font-family: 'Cascadia Code', 'Fira Code', monospace;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  display: grid;
+  grid-template-columns: minmax(max-content, 1fr) minmax(max-content, 1fr); /* chiều rộng cột tính theo max của toàn bộ file, không chỉ từng dòng */
+}
+
+/* Mỗi hàng diff */
+.tc-row {
+  display: contents; /* hòa vào grid cha — các cell được đặt trực tiếp vào tc-result-view grid */
+}
+.tc-row:last-child > .tc-cell { border-bottom: none; }
+
+/* Mỗi ô trong hàng */
+.tc-cell {
+  padding: 3px 10px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border); /* border dòng chuyển sang cell vì .tc-row dùng display:contents */
+}
+.tc-cell:last-child { border-right: none; }
+
+.tc-cell-equal   { background: transparent; }
+.tc-cell-removed { background: rgba(239, 68, 68, 0.15); }
+.tc-cell-added   { background: rgba(34, 197, 94, 0.15); }
+.tc-cell-empty   { background: var(--bg-card2); opacity: 0.5; }
+
+/* Highlight inline (trong dòng 'changed'): đánh dấu ký tự khác biệt */
+.tc-inline-removed { background: rgba(239, 68, 68, 0.45); border-radius: 2px; }
+.tc-inline-added   { background: rgba(34, 197, 94, 0.45);  border-radius: 2px; }
+
+/* Số thứ tự dòng */
+.tc-num {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  min-width: 26px;
+  text-align: right;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+/* Nội dung dòng */
+.tc-text {
+  white-space: pre; /* giữ nguyên khoảng trắng/tab, không wrap */
+  color: var(--text);
+}
+
+/* Scrollbar cho vùng diff */
+.tc-result-view::-webkit-scrollbar        { width: 6px; height: 6px; }
+.tc-result-view::-webkit-scrollbar-track  { background: transparent; }
+.tc-result-view::-webkit-scrollbar-thumb  { background: var(--border); border-radius: 4px; }
 
 /* ── About page ──────────────────────────────────────────────── */
 .about-card {

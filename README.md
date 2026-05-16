@@ -9,6 +9,7 @@ Không có backend, toàn bộ xử lý chạy trên trình duyệt.
 |---|---|
 | **String Length** | Paste chuỗi bất kỳ để xem tổng ký tự, ký tự không kể space, số từ và số dòng |
 | **Image to Base64** | Tải lên một hoặc nhiều ảnh, chuyển đổi sang chuỗi Base64 hoặc Data URL |
+| **Text Compare** | Dán hai đoạn văn bản, so sánh từng dòng và highlight chính xác các ký tự khác nhau |
 
 ## Tính năng khác
 

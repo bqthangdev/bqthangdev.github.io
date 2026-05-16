@@ -6,6 +6,7 @@
      3. Toast      — thông báo ngắn tự ẩn
      4. String Length  — đếm ký tự theo thời gian thực
      5. Image to Base64 — chuyển ảnh sang base64 / data URL
+     6. Text Compare   — so sánh hai đoạn văn bản theo từng dòng
 ═══════════════════════════════════════════════════════════════ */
 
 
@@ -124,6 +125,29 @@ document.addEventListener('DOMContentLoaded', () => {
     ibInput.value = '';
   });
 
+
+  /* ─── 6. TEXT COMPARE ───────────────────────────────────────
+     So sánh hai đoạn văn bản theo từng dòng (line-by-line).
+     Dùng thuật toán LCS để tìm các dòng giống/khác, sau đó
+     render kết quả side-by-side với màu highlight.
+  ─────────────────────────────────────────────────────────────── */
+  document.getElementById('tc-compare').addEventListener('click', () => {
+    const leftText  = document.getElementById('tc-left').value;
+    const rightText = document.getElementById('tc-right').value;
+    const diffs = diffLines(leftText.split('\n'), rightText.split('\n'));
+    renderDiff(diffs);
+    /* Sau khi render, scroll đến vùng kết quả để không phải cuộn thủ công */
+    document.getElementById('tc-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  /* Xóa cả hai textarea và ẩn kết quả */
+  document.getElementById('tc-clear').addEventListener('click', () => {
+    document.getElementById('tc-left').value  = '';
+    document.getElementById('tc-right').value = '';
+    document.getElementById('tc-result-view').innerHTML = '';
+    document.getElementById('tc-result').hidden = true;
+  });
+
 }); // end DOMContentLoaded
 
 
@@ -228,4 +252,183 @@ function escapeHtml(str) {
 /** Escape dấu nháy kép cho giá trị attribute HTML */
 function escapeAttr(str) {
   return str.replace(/"/g, '&quot;');
+}
+
+
+/* ─── TEXT COMPARE: helpers ─────────────────────────────────────
+   Tách ra ngoài DOMContentLoaded để sẵn sàng cho mọi nơi gọi.
+─────────────────────────────────────────────────────────────── */
+
+/**
+ * So sánh hai mảng dòng bằng LCS (Longest Common Subsequence).
+ * Trả về mảng {type, left, right} với type:
+ *   'equal'   — dòng giống nhau ở cả hai bên
+ *   'removed' — chỉ có ở Text A (bên trái)
+ *   'added'   — chỉ có ở Text B (bên phải)
+ *   'changed' — cặp removed+added liên tiếp, gộp hiển thị cùng hàng
+ */
+function diffLines(a, b) {
+  const m = a.length, n = b.length;
+
+  /* Xây dựng bảng LCS kích thước (m+1) x (n+1) */
+  const dp = [];
+  for (let i = 0; i <= m; i++) dp.push(new Array(n + 1).fill(0));
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] + 1 : Math.max(dp[i-1][j], dp[i][j-1]);
+
+  /* Truy vết ngược để lấy chuỗi thao tác diff */
+  const raw = [];
+  let i = m, j = n;
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && a[i-1] === b[j-1]) {
+      raw.push({ type: 'equal',   left: a[i-1], right: b[j-1] }); i--; j--;
+    } else if (j > 0 && (i === 0 || dp[i][j-1] >= dp[i-1][j])) {
+      raw.push({ type: 'added',   left: null,   right: b[j-1] }); j--;
+    } else {
+      raw.push({ type: 'removed', left: a[i-1], right: null   }); i--;
+    }
+  }
+  raw.reverse();
+
+  /* Gộp cặp removed+added liên tiếp thành 'changed' (hiển thị cùng hàng) */
+  const result = [];
+  for (let k = 0; k < raw.length; k++) {
+    if (raw[k].type === 'removed' && k + 1 < raw.length && raw[k+1].type === 'added') {
+      result.push({ type: 'changed', left: raw[k].left, right: raw[k+1].right });
+      k++; // bỏ qua phần tử tiếp theo đã được gộp
+    } else {
+      result.push(raw[k]);
+    }
+  }
+  return result;
+}
+
+/**
+ * So sánh hai chuỗi ký tự bằng LCS. Trả về mảng {type, text}
+ * với type: 'equal' | 'removed' | 'added'.
+ * Dùng để highlight khác biệt inline trong dòng 'changed'.
+ */
+function diffInline(a, b) {
+  /* Giới hạn độ dài để tránh LCS chậm trên chuỗi rất dài */
+  if (a.length + b.length > 1000) {
+    return [{ type: 'removed', text: a }, { type: 'added', text: b }];
+  }
+
+  const m = a.length, n = b.length;
+  const dp = [];
+  for (let i = 0; i <= m; i++) dp.push(new Array(n + 1).fill(0));
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] + 1 : Math.max(dp[i-1][j], dp[i][j-1]);
+
+  /* Truy vết ngược */
+  const raw = [];
+  let i = m, j = n;
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && a[i-1] === b[j-1]) {
+      raw.push({ type: 'equal',   text: a[i-1] }); i--; j--;
+    } else if (j > 0 && (i === 0 || dp[i][j-1] >= dp[i-1][j])) {
+      raw.push({ type: 'added',   text: b[j-1] }); j--;
+    } else {
+      raw.push({ type: 'removed', text: a[i-1] }); i--;
+    }
+  }
+  raw.reverse();
+
+  /* Gộp các ký tự liên tiếp cùng type thành một phần tử */
+  const result = [];
+  raw.forEach(part => {
+    if (result.length > 0 && result[result.length - 1].type === part.type) {
+      result[result.length - 1].text += part.text;
+    } else {
+      result.push({ type: part.type, text: part.text });
+    }
+  });
+  return result;
+}
+
+/**
+ * Render kết quả diff vào #tc-result-view dạng side-by-side.
+ * Mỗi hàng gồm hai ô: ô trái (Text A) và ô phải (Text B).
+ */
+function renderDiff(diffs) {
+  const view    = document.getElementById('tc-result-view');
+  const summary = document.getElementById('tc-summary');
+  const result  = document.getElementById('tc-result');
+
+  view.innerHTML = '';
+  let leftNum = 0, rightNum = 0, diffCount = 0;
+
+  diffs.forEach(d => {
+    const row = document.createElement('div');
+    row.className = 'tc-row';
+
+    if (d.type === 'equal') {
+      leftNum++; rightNum++;
+      row.appendChild(makeCell('equal',   leftNum,  d.left));
+      row.appendChild(makeCell('equal',   rightNum, d.right));
+    } else if (d.type === 'removed') {
+      leftNum++; diffCount++;
+      row.appendChild(makeCell('removed', leftNum,  d.left));
+      row.appendChild(makeCell('empty',   null,     null));
+    } else if (d.type === 'added') {
+      rightNum++; diffCount++;
+      row.appendChild(makeCell('empty',   null,     null));
+      row.appendChild(makeCell('added',   rightNum, d.right));
+    } else { // changed
+      leftNum++; rightNum++; diffCount++;
+      row.appendChild(makeCell('removed', leftNum,  d.left,  d.right)); // pass counterpart để highlight inline
+      row.appendChild(makeCell('added',   rightNum, d.right, d.left));  // pass counterpart để highlight inline
+    }
+    view.appendChild(row);
+  });
+
+  /* Hiển thị tóm tắt kết quả */
+  if (diffCount === 0) {
+    summary.textContent = '✓ The two texts are identical.';
+    summary.className   = 'tc-summary tc-summary-ok';
+  } else {
+    summary.textContent = `${diffCount} line${diffCount > 1 ? 's' : ''} differ.`;
+    summary.className   = 'tc-summary tc-summary-diff';
+  }
+  result.hidden = false;
+}
+
+/**
+ * Tạo một ô trong hàng diff. type: 'equal' | 'removed' | 'added' | 'empty'
+ * counterpart: chuỗi đối chiếu (chỉ truyền cho dòng 'changed' để highlight inline)
+ */
+function makeCell(type, num, text, counterpart) {
+  const cell = document.createElement('div');
+  cell.className = 'tc-cell tc-cell-' + type;
+  if (type === 'empty') return cell;
+
+  const numEl = document.createElement('span');
+  numEl.className   = 'tc-num';
+  numEl.textContent = num;
+
+  const textEl = document.createElement('span');
+  textEl.className = 'tc-text';
+
+  /* Nếu có counterpart: dùng diffInline để highlight các ký tự khác biệt */
+  if (counterpart !== undefined) {
+    const parts = type === 'removed'
+      ? diffInline(text, counterpart)
+      : diffInline(counterpart, text);
+    parts.forEach(part => {
+      if (type === 'removed' && part.type === 'added')   return; // bỏ phần chỉ có bên phải
+      if (type === 'added'   && part.type === 'removed') return; // bỏ phần chỉ có bên trái
+      const span = document.createElement('span');
+      span.textContent = part.text; // textContent is safe
+      if (part.type !== 'equal') span.className = 'tc-inline-' + part.type;
+      textEl.appendChild(span);
+    });
+  } else {
+    textEl.textContent = text; // textContent is safe — no need for escapeHtml
+  }
+
+  cell.appendChild(numEl);
+  cell.appendChild(textEl);
+  return cell;
 }

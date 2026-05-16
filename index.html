@@ -27,6 +27,10 @@
           <span class="nav-icon">🖼️</span>
           <span class="nav-label">Image to Base64</span>
         </button>
+        <button class="nav-item" data-page="text-compare">
+          <span class="nav-icon">🔀</span>
+          <span class="nav-label">Text Compare</span>
+        </button>
         <button class="nav-item" data-page="about">
           <span class="nav-icon">👤</span>
           <span class="nav-label">About</span>
@@ -101,6 +105,40 @@
           </label>
         </div>
         <div id="ib-results"></div>
+      </section>
+
+      <!-- Section: Text Compare (ẩn mặc định) -->
+      <section class="page" id="page-text-compare">
+        <div class="page-header">
+          <h1>Text Compare</h1>
+          <p class="page-desc">Paste text in both panels and click Compare to see line-by-line differences.</p>
+        </div>
+
+        <!-- Toolbar: Compare ở giữa, Clear all ở phải -->
+        <div class="tc-toolbar">
+          <div class="tc-toolbar-center">
+            <button class="btn btn-primary" id="tc-compare">Compare!</button>
+          </div>
+          <button class="btn btn-secondary" id="tc-clear">Clear all</button>
+        </div>
+
+        <!-- Input panels: hai textarea song song -->
+        <div class="tc-panels">
+          <div class="tc-panel">
+            <span class="tc-panel-label">Text A</span>
+            <textarea id="tc-left" class="textarea tc-textarea" placeholder="Paste Text A here..." spellcheck="false"></textarea>
+          </div>
+          <div class="tc-panel">
+            <span class="tc-panel-label">Text B</span>
+            <textarea id="tc-right" class="textarea tc-textarea" placeholder="Paste Text B here..." spellcheck="false"></textarea>
+          </div>
+        </div>
+
+        <!-- Kết quả diff (ẩn cho đến khi nhấn Compare) -->
+        <div class="tc-result" id="tc-result" hidden>
+          <p class="tc-summary" id="tc-summary"></p>
+          <div class="tc-result-view" id="tc-result-view"></div>
+        </div>
       </section>
 
       <!-- Section: About -->
