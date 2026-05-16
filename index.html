@@ -59,6 +59,14 @@
         <div class="page-header">
           <h1>String Length Checker</h1>
           <p class="page-desc">Paste your string below to check its length.</p>
+          <details class="guide">
+            <summary>💡 Hướng dẫn sử dụng</summary>
+            <ul>
+              <li>Paste hoặc gõ chuỗi bất kỳ vào ô bên dưới.</li>
+              <li>Các thống kê — tổng ký tự, không kể space, số từ, số dòng — cập nhật ngay khi nhập.</li>
+              <li>Nhấn <strong>Copy length</strong> để sao chép tổng số ký tự vào clipboard.</li>
+            </ul>
+          </details>
         </div>
         <div class="card">
           <div class="stats-row">
@@ -97,6 +105,14 @@
         <div class="page-header">
           <h1>Image to Base64</h1>
           <p class="page-desc">Upload one or more images to convert them to Base64.</p>
+          <details class="guide">
+            <summary>💡 Hướng dẫn sử dụng</summary>
+            <ul>
+              <li>Nhấn vào vùng upload hoặc <strong>kéo thả ảnh</strong> vào (PNG, JPG, GIF, WebP, SVG…). Có thể chọn nhiều ảnh cùng lúc.</li>
+              <li>Mỗi ảnh hiển thị kết quả riêng; chọn định dạng <strong>Base64</strong> (chuỗi thuần) hoặc <strong>Data URL</strong> (có prefix <code>data:image/…</code>).</li>
+              <li>Nhấn <strong>Copy</strong> để sao chép hoặc <strong>Download</strong> để tải về file <code>.txt</code>.</li>
+            </ul>
+          </details>
         </div>
         <div class="card">
           <label class="drop-zone" id="ib-dropzone">
@@ -116,14 +132,15 @@
         <div class="page-header">
           <h1>Text Compare</h1>
           <p class="page-desc">Paste text in both panels and click Compare to see line-by-line differences.</p>
-        </div>
-
-        <!-- Toolbar: Compare ở giữa, Clear all ở phải -->
-        <div class="tc-toolbar">
-          <div class="tc-toolbar-center">
-            <button class="btn btn-primary" id="tc-compare">Compare!</button>
-          </div>
-          <button class="btn btn-secondary" id="tc-clear">Clear all</button>
+          <details class="guide">
+            <summary>💡 Hướng dẫn sử dụng</summary>
+            <ul>
+              <li>Dán nội dung vào ô <strong>Text A</strong> và <strong>Text B</strong>, sau đó nhấn <strong>Compare!</strong>.</li>
+              <li>Kết quả hiển thị theo dòng: <strong>nền xanh</strong> = thêm mới, <strong>nền đỏ</strong> = đã xóa, <strong>nền vàng</strong> = có thay đổi.</li>
+              <li>Trong các dòng thay đổi, các ký tự khác nhau được highlight thêm ở mức ký tự.</li>
+              <li>Nhấn <strong>Clear all</strong> để xóa toàn bộ và làm mới.</li>
+            </ul>
+          </details>
         </div>
 
         <!-- Input panels: hai textarea song song -->
@@ -138,6 +155,14 @@
           </div>
         </div>
 
+        <!-- Toolbar: Compare ở giữa, Clear all ở phải -->
+        <div class="tc-toolbar">
+          <div class="tc-toolbar-center">
+            <button class="btn btn-primary" id="tc-compare">Compare!</button>
+          </div>
+          <button class="btn btn-secondary" id="tc-clear">Clear all</button>
+        </div>
+
         <!-- Kết quả diff (ẩn cho đến khi nhấn Compare) -->
         <div class="tc-result" id="tc-result" hidden>
           <p class="tc-summary" id="tc-summary"></p>
@@ -150,6 +175,15 @@
         <div class="page-header">
           <h1>Markdown Reader</h1>
           <p class="page-desc">Upload a .md file or paste Markdown content to preview it.</p>
+          <details class="guide">
+            <summary>💡 Hướng dẫn sử dụng</summary>
+            <ul>
+              <li>Nhấn <strong>Load .md file</strong> để tải file Markdown từ máy, hoặc paste trực tiếp vào ô bên trái.</li>
+              <li>Preview tự động cập nhật theo thời gian thực khi bạn nhập.</li>
+              <li>Chọn <strong>Side by side</strong> để xem song song hoặc <strong>Below</strong> để xem bên dưới.</li>
+              <li>Nhấn <strong>Clear</strong> để xóa nội dung và reset preview.</li>
+            </ul>
+          </details>
         </div>
 
         <!-- Toolbar: upload file + toggle chế độ xem + clear -->
