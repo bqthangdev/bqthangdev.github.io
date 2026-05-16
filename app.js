@@ -7,6 +7,7 @@
      4. String Length  — đếm ký tự theo thời gian thực
      5. Image to Base64 — chuyển ảnh sang base64 / data URL
      6. Text Compare   — so sánh hai đoạn văn bản theo từng dòng
+     7. Markdown Reader — đọc và render file Markdown
 ═══════════════════════════════════════════════════════════════ */
 
 
@@ -146,6 +147,62 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('tc-right').value = '';
     document.getElementById('tc-result-view').innerHTML = '';
     document.getElementById('tc-result').hidden = true;
+  });
+
+
+  /* ─── 7. MARKDOWN READER ───────────────────────────────────────
+     Render Markdown sang HTML dùng marked.js (đã load qua CDN).
+     Hỗ trợ upload file .md hoặc paste nội dung trực tiếp.
+     Hai chế độ xem: side-by-side (split) và below.
+  ─────────────────────────────────────────────────────────────────── */
+  const mrInput     = document.getElementById('mr-input');
+  const mrPreview   = document.getElementById('mr-preview');
+  const mrContainer = document.getElementById('mr-container');
+
+  /* Render nội dung markdown hiện tại vào ô preview */
+  const mrRender = () => {
+    const md = mrInput.value;
+    if (!md.trim()) {
+      mrPreview.innerHTML = '<p class="mr-empty">Preview will appear here.</p>';
+      return;
+    }
+    mrPreview.innerHTML = marked.parse(md);
+  };
+
+  /* Cập nhật preview mỗi khi người dùng gõ / paste */
+  mrInput.addEventListener('input', mrRender);
+
+  /* Mở file picker khi nhấn nút load */
+  document.getElementById('mr-file-btn').addEventListener('click', () => {
+    document.getElementById('mr-file-input').click();
+  });
+
+  /* Đọc file .md và điền vào textarea, sau đó render ngay */
+  document.getElementById('mr-file-input').addEventListener('change', function () {
+    const file = this.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      mrInput.value = e.target.result;
+      mrRender();
+      this.value = ''; // reset để có thể chọn lại cùng file
+    };
+    reader.readAsText(file, 'UTF-8');
+  });
+
+  /* Chuyển chế độ xem: split ↔ below */
+  document.querySelectorAll('.mr-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.mr-toggle').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      mrContainer.className = 'mr-container mr-' + btn.dataset.view;
+    });
+  });
+
+  /* Xóa nội dung và reset preview */
+  document.getElementById('mr-clear').addEventListener('click', () => {
+    mrInput.value = '';
+    mrRender();
   });
 
 }); // end DOMContentLoaded

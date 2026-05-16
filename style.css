@@ -458,6 +458,120 @@ body {
 .tc-result-view::-webkit-scrollbar-track  { background: transparent; }
 .tc-result-view::-webkit-scrollbar-thumb  { background: var(--border); border-radius: 4px; }
 
+/* ── Markdown Reader ─────────────────────────────────────────── */
+/* Page markdown-reader chiếm toàn bộ chiều cao viewport (trừ padding .content) */
+#page-markdown-reader.active {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 72px); /* 72px = 36px top + 36px bottom padding của .content */
+}
+
+.mr-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.mr-toolbar-right { display: flex; gap: 8px; margin-left: auto; }
+
+/* Nút toggle active */
+.mr-toggle.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+/* Container chứa editor + preview — grow fill phần còn lại của page */
+.mr-container      { display: flex; gap: 16px; flex: 1; min-height: 0; }
+.mr-container.mr-split { flex-direction: row; }
+.mr-container.mr-below { flex-direction: column; }
+
+/* Panel chung */
+.mr-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+.mr-panel-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Textarea editor — flex: 1 để lấp đầy panel */
+.mr-textarea { flex: 1; min-height: 0; resize: none; }
+
+/* Vùng preview */
+.mr-preview {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  color: var(--text);
+  line-height: 1.7;
+  font-size: 0.95rem;
+  overflow-wrap: break-word;
+}
+.mr-empty { color: var(--text-muted); font-style: italic; margin: 0; }
+
+/* ── Markdown typography (scoped trong .mr-preview) ── */
+.mr-preview > :first-child { margin-top: 0; }
+.mr-preview > :last-child  { margin-bottom: 0; }
+
+.mr-preview h1 { font-size: 1.7rem;  font-weight: 700; margin: 0 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.mr-preview h2 { font-size: 1.35rem; font-weight: 700; margin: 24px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+.mr-preview h3 { font-size: 1.1rem;  font-weight: 600; margin: 20px 0 10px; }
+.mr-preview h4, .mr-preview h5, .mr-preview h6 { font-weight: 600; margin: 16px 0 8px; }
+.mr-preview p  { margin: 0 0 12px; }
+.mr-preview a  { color: var(--primary); text-decoration: none; }
+.mr-preview a:hover { text-decoration: underline; }
+.mr-preview ul, .mr-preview ol { margin: 0 0 12px 24px; }
+.mr-preview li { margin-bottom: 4px; }
+.mr-preview blockquote {
+  border-left: 3px solid var(--primary);
+  margin: 16px 0;
+  padding: 8px 16px;
+  background: var(--bg-card2);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  color: var(--text-muted);
+}
+.mr-preview hr  { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+.mr-preview img { max-width: 100%; border-radius: var(--radius); }
+
+/* Inline code */
+.mr-preview code {
+  font-family: 'Cascadia Code', 'Fira Code', monospace;
+  font-size: 0.85em;
+  background: var(--bg-card2);
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+/* Code block */
+.mr-preview pre {
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  overflow-x: auto;
+  margin: 0 0 16px;
+}
+.mr-preview pre code { background: none; padding: 0; font-size: 0.82rem; }
+
+/* Table */
+.mr-preview table { width: 100%; border-collapse: collapse; margin: 0 0 16px; }
+.mr-preview th, .mr-preview td { border: 1px solid var(--border); padding: 6px 12px; text-align: left; }
+.mr-preview th { background: var(--bg-card2); font-weight: 600; }
+.mr-preview tbody tr:nth-child(even) td { background: var(--bg-card2); }
+
 /* ── About page ──────────────────────────────────────────────── */
 .about-card {
   display: flex;

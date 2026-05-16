@@ -31,6 +31,10 @@
           <span class="nav-icon">🔀</span>
           <span class="nav-label">Text Compare</span>
         </button>
+        <button class="nav-item" data-page="markdown-reader">
+          <span class="nav-icon">📝</span>
+          <span class="nav-label">Markdown Reader</span>
+        </button>
         <button class="nav-item" data-page="about">
           <span class="nav-icon">👤</span>
           <span class="nav-label">About</span>
@@ -141,6 +145,37 @@
         </div>
       </section>
 
+      <!-- Section: Markdown Reader (ẩn mặc định) -->
+      <section class="page" id="page-markdown-reader">
+        <div class="page-header">
+          <h1>Markdown Reader</h1>
+          <p class="page-desc">Upload a .md file or paste Markdown content to preview it.</p>
+        </div>
+
+        <!-- Toolbar: upload file + toggle chế độ xem + clear -->
+        <div class="mr-toolbar">
+          <button class="btn btn-secondary" id="mr-file-btn">📂 Load .md file</button>
+          <input type="file" id="mr-file-input" accept=".md,.markdown,text/markdown,text/plain" hidden />
+          <div class="mr-toolbar-right">
+            <button class="btn btn-secondary mr-toggle active" data-view="split">Side by side</button>
+            <button class="btn btn-secondary mr-toggle" data-view="below">Below</button>
+            <button class="btn btn-secondary" id="mr-clear">Clear</button>
+          </div>
+        </div>
+
+        <!-- Editor + Preview (class mr-split hoặc mr-below) -->
+        <div class="mr-container mr-split" id="mr-container">
+          <div class="mr-panel">
+            <span class="mr-panel-label">Markdown</span>
+            <textarea id="mr-input" class="textarea mr-textarea" placeholder="Paste Markdown here..." spellcheck="false"></textarea>
+          </div>
+          <div class="mr-panel">
+            <span class="mr-panel-label">Preview</span>
+            <div class="mr-preview" id="mr-preview"><p class="mr-empty">Preview will appear here.</p></div>
+          </div>
+        </div>
+      </section>
+
       <!-- Section: About -->
       <section class="page" id="page-about">
         <div class="page-header">
@@ -166,6 +201,8 @@
   </div>
 
   <div class="toast" id="toast"></div>
+  <!-- marked.js: render Markdown sang HTML cho Markdown Reader tool -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
