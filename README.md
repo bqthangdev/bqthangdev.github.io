@@ -11,6 +11,7 @@ Không có backend, toàn bộ xử lý chạy trên trình duyệt.
 | **Image to Base64** | Tải lên một hoặc nhiều ảnh, chuyển đổi sang chuỗi Base64 hoặc Data URL |
 | **Text Compare** | Dán hai đoạn văn bản, so sánh từng dòng và highlight chính xác các ký tự khác nhau |
 | **Markdown Reader** | Tải lên file `.md` hoặc paste nội dung Markdown, xem preview với hai chế độ side-by-side và below |
+| **Case Converter** | Chuyển đổi text sang camelCase, snake_case, PascalCase, kebab-case và 11 định dạng khác |
 
 ## Tính năng khác
 

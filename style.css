@@ -620,6 +620,63 @@ body {
 .mr-preview th { background: var(--bg-card2); font-weight: 600; }
 .mr-preview tbody tr:nth-child(even) td { background: var(--bg-card2); }
 
+/* ── Case Converter ──────────────────────────────────────────── */
+.cc-layout {
+  display: flex;
+  gap: 16px;
+}
+
+.cc-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.cc-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.cc-textarea { min-height: 200px; resize: vertical; }
+
+/* Nhóm nút case */
+.cc-cases {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Nút case — màu nghịch với nền (đen ở light mode, trắng ở dark mode) */
+.btn-case {
+  padding: 7px 14px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  background: var(--text);
+  color: var(--bg);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity var(--transition);
+}
+.btn-case:hover { opacity: 0.72; }
+
+/* Nhóm nút action (Clear / Copy) */
+.cc-actions { display: flex; gap: 8px; }
+
+/* Danger button — Clear màu đỏ */
+.btn-danger {
+  background: #e53e3e;
+  color: #fff;
+  border-color: #e53e3e;
+}
+.btn-danger:hover { background: #c53030; border-color: #c53030; }
+
 /* ── About page ──────────────────────────────────────────────── */
 .about-card {
   display: flex;

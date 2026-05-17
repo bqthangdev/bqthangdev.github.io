@@ -35,6 +35,10 @@
           <span class="nav-icon">📝</span>
           <span class="nav-label">Markdown Reader</span>
         </button>
+        <button class="nav-item" data-page="case-converter">
+          <span class="nav-icon">🔤</span>
+          <span class="nav-label">Case Converter</span>
+        </button>
         <button class="nav-item" data-page="about">
           <span class="nav-icon">👤</span>
           <span class="nav-label">About</span>
@@ -206,6 +210,58 @@
           <div class="mr-panel">
             <span class="mr-panel-label">Preview</span>
             <div class="mr-preview" id="mr-preview"><p class="mr-empty">Preview will appear here.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: Case Converter (ẩn mặc định) -->
+      <section class="page" id="page-case-converter">
+        <div class="page-header">
+          <h1>Case Converter</h1>
+          <p class="page-desc">Convert text to different letter cases: camelCase, snake_case, PascalCase, and more.</p>
+          <details class="guide">
+            <summary>💡 Hướng dẫn sử dụng</summary>
+            <ul>
+              <li>Nhập hoặc paste văn bản vào ô <strong>Input Text</strong>.</li>
+              <li>Nhấn một trong các nút case để chuyển đổi ngầy sang ô <strong>Output Text</strong>.</li>
+              <li>Mỗi dòng được xử lý độc lập — hỗ trợ nhiều dòng cùng lúc.</li>
+              <li>Nhấn <strong>Copy</strong> để sao chép kết quả, <strong>Clear</strong> để xóa toàn bộ.</li>
+            </ul>
+          </details>
+        </div>
+
+        <div class="cc-layout">
+          <!-- Panel trái: input + các nút case -->
+          <div class="cc-panel">
+            <span class="cc-label">Input Text</span>
+            <textarea id="cc-input" class="textarea cc-textarea" placeholder="Paste text here..." spellcheck="false"></textarea>
+            <div class="cc-cases">
+              <button class="btn-case" data-case="lowercase">lowercase</button>
+              <button class="btn-case" data-case="UPPERCASE">UPPERCASE</button>
+              <button class="btn-case" data-case="camelCase">camelCase</button>
+              <button class="btn-case" data-case="Capital Case">Capital Case</button>
+              <button class="btn-case" data-case="CONSTANT_CASE">CONSTANT_CASE</button>
+              <button class="btn-case" data-case="dot.case">dot.case</button>
+              <button class="btn-case" data-case="kebab-case">kebab-case</button>
+              <button class="btn-case" data-case="no case">no case</button>
+              <button class="btn-case" data-case="PascalCase">PascalCase</button>
+              <button class="btn-case" data-case="Pascal_Snake_Case">Pascal_Snake_Case</button>
+              <button class="btn-case" data-case="path/case">path/case</button>
+              <button class="btn-case" data-case="Sentence case">Sentence case</button>
+              <button class="btn-case" data-case="snake_case">snake_case</button>
+              <button class="btn-case" data-case="sWAP cASE">sWAP cASE</button>
+              <button class="btn-case" data-case="Train-Case">Train-Case</button>
+            </div>
+          </div>
+
+          <!-- Panel phải: output + actions -->
+          <div class="cc-panel">
+            <span class="cc-label">Output Text</span>
+            <textarea id="cc-output" class="textarea cc-textarea" readonly placeholder="Result will appear here..."></textarea>
+            <div class="cc-actions">
+              <button class="btn btn-danger" id="cc-clear">🗑 Clear</button>
+              <button class="btn btn-secondary" id="cc-copy">📋 Copy</button>
+            </div>
           </div>
         </div>
       </section>

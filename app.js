@@ -8,6 +8,7 @@
      5. Image to Base64 — chuyển ảnh sang base64 / data URL
      6. Text Compare   — so sánh hai đoạn văn bản theo từng dòng
      7. Markdown Reader — đọc và render file Markdown
+     8. Case Converter   — chuyển đổi text sang nhiều định dạng case
 ═══════════════════════════════════════════════════════════════ */
 
 
@@ -91,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
   /* Copy số ký tự vào clipboard */
   document.getElementById('sl-copy').addEventListener('click', () => {
     const len = slInput.value.length.toString();
-    navigator.clipboard.writeText(len).then(() => showToast(`Copied: ${len} characters`));
+    copyToClipboard(len, `Copied: ${len} characters`);
   });
 
 
@@ -205,6 +206,70 @@ document.addEventListener('DOMContentLoaded', () => {
     mrRender();
   });
 
+
+  /* ─── 8. CASE CONVERTER ────────────────────────────────────────
+     Chuyển đổi text sang các định dạng case: camelCase, snake_case, v.v.
+     Xử lý từng dòng độc lập. Không cần thư viện ngoài.
+  ─────────────────────────────────────────────────────────────────── */
+  const ccInput  = document.getElementById('cc-input');
+  const ccOutput = document.getElementById('cc-output');
+
+  /* Tách cỗi thành mảng từ — hiểu camelCase, PascalCase, snake_case, kebab-case, v.v. */
+  const ccSplitWords = str =>
+    str
+      .replace(/([a-z])([A-Z])/g, '$1 $2')
+      .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
+      .replace(/[^a-zA-Z0-9]+/g, ' ')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+
+  /* Capitalize một từ */
+  const ccCap = w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+
+  /* Bảng ánh xạ tên case → hàm chuyển đổi */
+  const ccConverters = {
+    'lowercase':         str => str.toLowerCase(),
+    'UPPERCASE':         str => str.toUpperCase(),
+    'camelCase':         str => { const w = ccSplitWords(str); return w.length ? w[0].toLowerCase() + w.slice(1).map(ccCap).join('') : ''; },
+    'Capital Case':      str => ccSplitWords(str).map(ccCap).join(' '),
+    'CONSTANT_CASE':     str => ccSplitWords(str).join('_').toUpperCase(),
+    'dot.case':          str => ccSplitWords(str).join('.').toLowerCase(),
+    'kebab-case':        str => ccSplitWords(str).join('-').toLowerCase(),
+    'no case':           str => ccSplitWords(str).join(' ').toLowerCase(),
+    'PascalCase':        str => ccSplitWords(str).map(ccCap).join(''),
+    'Pascal_Snake_Case': str => ccSplitWords(str).map(ccCap).join('_'),
+    'path/case':         str => ccSplitWords(str).join('/').toLowerCase(),
+    'Sentence case':     str => { const w = ccSplitWords(str); return w.length ? ccCap(w[0]) + (w.length > 1 ? ' ' + w.slice(1).map(s => s.toLowerCase()).join(' ') : '') : ''; },
+    'snake_case':        str => ccSplitWords(str).join('_').toLowerCase(),
+    'sWAP cASE':         str => str.split('').map(c => c === c.toUpperCase() ? c.toLowerCase() : c.toUpperCase()).join(''),
+    'Train-Case':        str => ccSplitWords(str).map(ccCap).join('-'),
+  };
+
+  /* Áp dụng conversion — mỗi dòng được xử lý độc lập */
+  const ccConvert = caseName => {
+    const fn = ccConverters[caseName];
+    if (!fn) return;
+    ccOutput.value = ccInput.value.split('\n').map(fn).join('\n');
+  };
+
+  /* Gắn sự kiện cho tất cả nút case */
+  document.querySelectorAll('.btn-case').forEach(btn => {
+    btn.addEventListener('click', () => ccConvert(btn.dataset.case));
+  });
+
+  /* Clear: xóa cả input lẫn output */
+  document.getElementById('cc-clear').addEventListener('click', () => {
+    ccInput.value = '';
+    ccOutput.value = '';
+  });
+
+  /* Copy output */
+  document.getElementById('cc-copy').addEventListener('click', () => {
+    if (!ccOutput.value) return;
+    copyToClipboard(ccOutput.value, 'Copied!');
+  });
+
 }); // end DOMContentLoaded
 
 
@@ -219,6 +284,28 @@ function showToast(msg) {
   toast.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+/** Fallback copy bằng execCommand cho môi trường không có Clipboard API (file://, HTTP) */
+function execCopy(text) {
+  const el = document.createElement('textarea');
+  el.value = text;
+  el.style.cssText = 'position:fixed;opacity:0;pointer-events:none';
+  document.body.appendChild(el);
+  el.select();
+  try { document.execCommand('copy'); } catch (_) {}
+  el.remove();
+}
+
+/** Copy text vào clipboard (hỗ trợ cả HTTPS lẫn HTTP/file://) và hiện toast */
+function copyToClipboard(text, msg) {
+  const done = () => showToast(msg || 'Copied!');
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(done).catch(() => { execCopy(text); done(); });
+  } else {
+    execCopy(text);
+    done();
+  }
 }
 
 
@@ -276,13 +363,13 @@ function renderResult(file, dataUrl) {
   item.querySelector('.btn-copy-b64').addEventListener('click', () => {
     const full   = item.querySelector('.result-box').dataset.full;
     const base64 = full.split(',')[1] || full;
-    navigator.clipboard.writeText(base64).then(() => showToast('Base64 copied!'));
+    copyToClipboard(base64, 'Base64 copied!');
   });
 
   /* Copy toàn bộ data URL (dùng được trực tiếp trong <img src="..."> hay CSS) */
   item.querySelector('.btn-copy-url').addEventListener('click', () => {
     const full = item.querySelector('.result-box').dataset.full;
-    navigator.clipboard.writeText(full).then(() => showToast('Data URL copied!'));
+    copyToClipboard(full, 'Data URL copied!');
   });
 
   /* Xóa card khỏi danh sách */
