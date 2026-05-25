@@ -206,6 +206,11 @@ document.addEventListener('DOMContentLoaded', () => {
     mrRender();
   });
 
+  /* Xuất preview ra PDF qua hộp thoại in của trình duyệt */
+  document.getElementById('mr-export-pdf').addEventListener('click', () => {
+    window.print();
+  });
+
 
   /* ─── 8. CASE CONVERTER ────────────────────────────────────────
      Chuyển đổi text sang các định dạng case: camelCase, snake_case, v.v.
