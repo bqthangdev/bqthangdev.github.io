@@ -535,6 +535,9 @@ body {
 .mr-container.mr-split { flex-direction: row; }
 .mr-container.mr-below { flex-direction: column; }
 
+/* Trong chế độ below, mỗi panel cần min-height để editor không bị thu nhỏ bất thường */
+.mr-container.mr-below .mr-panel { min-height: 260px; }
+
 /* Panel chung */
 .mr-panel {
   display: flex;

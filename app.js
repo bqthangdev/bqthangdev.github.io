@@ -173,6 +173,19 @@ document.addEventListener('DOMContentLoaded', () => {
   /* Cập nhật preview mỗi khi người dùng gõ / paste */
   mrInput.addEventListener('input', mrRender);
 
+  /* Chèn ký tự tab khi nhấn Tab thay vì chuyển focus ra ngoài.
+     Dùng dispatchEvent('input') để mọi listener (mrRender, v.v.) chạy
+     qua đúng kênh event thay vì gọi trực tiếp. */
+  mrInput.addEventListener('keydown', e => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const start = mrInput.selectionStart;
+      const end   = mrInput.selectionEnd;
+      mrInput.setRangeText('    ', start, end, 'end');
+      mrInput.dispatchEvent(new Event('input'));
+    }
+  });
+
   /* Mở file picker khi nhấn nút load */
   document.getElementById('mr-file-btn').addEventListener('click', () => {
     document.getElementById('mr-file-input').click();
@@ -209,6 +222,19 @@ document.addEventListener('DOMContentLoaded', () => {
   /* Xuất preview ra PDF qua hộp thoại in của trình duyệt */
   document.getElementById('mr-export-pdf').addEventListener('click', () => {
     window.print();
+  });
+
+  /* Tải nội dung editor về dưới dạng file .md */
+  document.getElementById('mr-download').addEventListener('click', () => {
+    const content = mrInput.value;
+    if (!content) return;
+    const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'document.md';
+    a.click();
+    URL.revokeObjectURL(url);
   });
 
 
