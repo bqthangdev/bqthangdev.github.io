@@ -521,10 +521,16 @@ body {
   margin-bottom: 16px;
   flex-wrap: wrap;
 }
-.mr-toolbar-right { display: flex; gap: 8px; margin-left: auto; }
+.mr-toolbar-right { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
 
 /* Nút toggle active */
 .mr-toggle.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.mr-memory-toggle.active {
   background: var(--primary);
   color: #fff;
   border-color: var(--primary);
@@ -536,7 +542,7 @@ body {
 .mr-container.mr-below { flex-direction: column; }
 
 /* Trong chế độ below, mỗi panel cần min-height để editor không bị thu nhỏ bất thường */
-.mr-container.mr-below .mr-panel { min-height: 260px; }
+.mr-container.mr-below .mr-panel { flex: none; min-height: 260px; }
 
 /* Panel chung */
 .mr-panel {
@@ -557,6 +563,11 @@ body {
 
 /* Textarea editor — flex: 1 để lấp đầy panel */
 .mr-textarea { flex: 1; min-height: 0; resize: none; }
+.mr-container.mr-below .mr-textarea {
+  flex: none;
+  min-height: 260px;
+  overflow-y: hidden;
+}
 
 /* Vùng preview */
 .mr-preview {

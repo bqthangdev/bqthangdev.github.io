@@ -159,6 +159,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const mrInput     = document.getElementById('mr-input');
   const mrPreview   = document.getElementById('mr-preview');
   const mrContainer = document.getElementById('mr-container');
+  const mrMemoryToggle = document.getElementById('mr-memory-toggle');
+  const mrMemoryClear  = document.getElementById('mr-memory-clear');
+
+  const MR_STORAGE_PREFIX = 'devtools:markdown-reader:';
+  const MR_MEMORY_MODE_KEY = MR_STORAGE_PREFIX + 'memory-mode';
+  const MR_MEMORY_COUNT_KEY = MR_STORAGE_PREFIX + 'memory-chunk-count';
+  const MR_MEMORY_CHUNK_PREFIX = MR_STORAGE_PREFIX + 'memory-content:';
+  const MR_MEMORY_CHUNK_SIZE = 200000;
+  let mrMemoryEnabled = localStorage.getItem(MR_MEMORY_MODE_KEY) === 'true';
 
   /* Render nội dung markdown hiện tại vào ô preview */
   const mrRender = () => {
@@ -170,8 +179,90 @@ document.addEventListener('DOMContentLoaded', () => {
     mrPreview.innerHTML = marked.parse(md);
   };
 
+  const mrForEachMemoryKey = callback => {
+    const keys = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(MR_MEMORY_CHUNK_PREFIX)) keys.push(key);
+    }
+    keys.forEach(callback);
+  };
+
+  const mrClearMemoryContent = () => {
+    mrForEachMemoryKey(key => localStorage.removeItem(key));
+    localStorage.removeItem(MR_MEMORY_COUNT_KEY);
+  };
+
+  const mrReadMemoryContent = () => {
+    const count = Number(localStorage.getItem(MR_MEMORY_COUNT_KEY) || 0);
+    if (!Number.isInteger(count) || count <= 0) return '';
+
+    let content = '';
+    for (let i = 0; i < count; i++) {
+      content += localStorage.getItem(MR_MEMORY_CHUNK_PREFIX + i) || '';
+    }
+    return content;
+  };
+
+  const mrSaveMemoryContent = content => {
+    if (!mrMemoryEnabled) return;
+
+    try {
+      mrClearMemoryContent();
+      if (!content) return;
+
+      const count = Math.ceil(content.length / MR_MEMORY_CHUNK_SIZE);
+      for (let i = 0; i < count; i++) {
+        const start = i * MR_MEMORY_CHUNK_SIZE;
+        localStorage.setItem(
+          MR_MEMORY_CHUNK_PREFIX + i,
+          content.slice(start, start + MR_MEMORY_CHUNK_SIZE)
+        );
+      }
+      localStorage.setItem(MR_MEMORY_COUNT_KEY, String(count));
+    } catch (_) {
+      mrClearMemoryContent();
+      showToast('Markdown memory is full. Content was not saved.');
+    }
+  };
+
+  const mrApplyMemoryControls = () => {
+    mrMemoryToggle.textContent = mrMemoryEnabled ? 'Memory: On' : 'Memory: Off';
+    mrMemoryToggle.classList.toggle('active', mrMemoryEnabled);
+    mrMemoryClear.hidden = !mrMemoryEnabled;
+  };
+
+  const mrResizeEditor = () => {
+    if (!mrContainer.classList.contains('mr-below')) {
+      mrInput.style.height = '';
+      return;
+    }
+    mrInput.style.height = 'auto';
+    mrInput.style.height = (mrInput.scrollHeight + 2) + 'px';
+  };
+
+  const mrHandleInput = () => {
+    mrRender();
+    mrResizeEditor();
+    mrSaveMemoryContent(mrInput.value);
+  };
+
+  const mrClearEditor = () => {
+    mrInput.value = '';
+    mrInput.dispatchEvent(new Event('input'));
+  };
+
+  if (mrMemoryEnabled) {
+    mrInput.value = mrReadMemoryContent();
+  } else {
+    mrClearMemoryContent();
+  }
+  mrApplyMemoryControls();
+  mrRender();
+  mrResizeEditor();
+
   /* Cập nhật preview mỗi khi người dùng gõ / paste */
-  mrInput.addEventListener('input', mrRender);
+  mrInput.addEventListener('input', mrHandleInput);
 
   /* Chèn ký tự tab khi nhấn Tab thay vì chuyển focus ra ngoài.
      Dùng dispatchEvent('input') để mọi listener (mrRender, v.v.) chạy
@@ -198,10 +289,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const reader = new FileReader();
     reader.onload = e => {
       mrInput.value = e.target.result;
-      mrRender();
+      mrInput.dispatchEvent(new Event('input'));
       this.value = ''; // reset để có thể chọn lại cùng file
     };
     reader.readAsText(file, 'UTF-8');
+  });
+
+  mrMemoryToggle.addEventListener('click', () => {
+    mrMemoryEnabled = !mrMemoryEnabled;
+    localStorage.setItem(MR_MEMORY_MODE_KEY, mrMemoryEnabled ? 'true' : 'false');
+
+    if (mrMemoryEnabled) {
+      mrSaveMemoryContent(mrInput.value);
+      showToast('Markdown memory enabled.');
+    } else {
+      mrClearMemoryContent();
+      showToast('Markdown memory cleared.');
+    }
+    mrApplyMemoryControls();
+  });
+
+  mrMemoryClear.addEventListener('click', () => {
+    mrClearMemoryContent();
+    mrClearEditor();
+    showToast('Markdown memory cleared.');
   });
 
   /* Chuyển chế độ xem: split ↔ below */
@@ -210,13 +321,13 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.mr-toggle').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       mrContainer.className = 'mr-container mr-' + btn.dataset.view;
+      mrResizeEditor();
     });
   });
 
   /* Xóa nội dung và reset preview */
   document.getElementById('mr-clear').addEventListener('click', () => {
-    mrInput.value = '';
-    mrRender();
+    mrClearEditor();
   });
 
   /* Xuất preview ra PDF qua hộp thoại in của trình duyệt */

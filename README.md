@@ -10,12 +10,13 @@ Không có backend, toàn bộ xử lý chạy trên trình duyệt.
 | **String Length** | Paste chuỗi bất kỳ để xem tổng ký tự, ký tự không kể space, số từ và số dòng |
 | **Image to Base64** | Tải lên một hoặc nhiều ảnh, chuyển đổi sang chuỗi Base64 hoặc Data URL |
 | **Text Compare** | Dán hai đoạn văn bản, so sánh từng dòng và highlight chính xác các ký tự khác nhau |
-| **Markdown Reader** | Tải lên file `.md` hoặc paste nội dung Markdown, xem preview với hai chế độ side-by-side và below; xuất preview ra PDF |
+| **Markdown Reader** | Tải lên file `.md` hoặc paste nội dung Markdown, xem preview với hai chế độ side-by-side và below; hỗ trợ Memory mode lưu nội dung editor vào `localStorage`; xuất preview ra PDF |
 | **Case Converter** | Chuyển đổi text sang camelCase, snake_case, PascalCase, kebab-case và 11 định dạng khác |
 
 ## Tính năng khác
 
 - Chuyển đổi giao diện **Dark / Light**, lưu tuỳ chọn vào `localStorage`
+- Markdown Reader hỗ trợ **Memory mode** để tự lưu và khôi phục nội dung editor trên cùng trình duyệt
 - Hỗ trợ **drag & drop** ảnh
 - Responsive trên màn hình nhỏ
 
