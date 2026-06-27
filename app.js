@@ -48,16 +48,35 @@ document.addEventListener('DOMContentLoaded', () => {
      Liên kết giữa button và section qua attribute data-page
      và id của section (id = "page-" + data-page).
   ─────────────────────────────────────────────────────────────── */
-  document.querySelectorAll('.nav-item').forEach(btn => {
-    btn.addEventListener('click', () => {
-      /* Đổi active trên nav */
-      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+  const navItems = document.querySelectorAll('.nav-item');
+  const defaultPage = 'string-length';
 
-      /* Hiển thị đúng section */
+  const setActivePage = target => {
+    const activeBtn = document.querySelector(`.nav-item[data-page="${target}"]`);
+    const activePage = document.getElementById('page-' + target);
+    if (!activeBtn || !activePage) return;
+
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    activeBtn.classList.add('active');
+
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    activePage.classList.add('active');
+  };
+
+  const updateToolParam = target => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('tool', target);
+    window.history.replaceState(null, '', url);
+  };
+
+  const requestedPage = new URLSearchParams(window.location.search).get('tool') || defaultPage;
+  setActivePage(document.getElementById('page-' + requestedPage) ? requestedPage : defaultPage);
+
+  navItems.forEach(btn => {
+    btn.addEventListener('click', () => {
       const target = btn.dataset.page;
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.getElementById('page-' + target).classList.add('active');
+      setActivePage(target);
+      updateToolParam(target);
     });
   });
 

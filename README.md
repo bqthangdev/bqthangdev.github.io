@@ -17,6 +17,8 @@ Không có backend, toàn bộ xử lý chạy trên trình duyệt.
 
 - Chuyển đổi giao diện **Dark / Light**, lưu tuỳ chọn vào `localStorage`
 - Markdown Reader hỗ trợ **Memory mode** để tự lưu và khôi phục nội dung editor trên cùng trình duyệt
+- Giữ tool đang mở bằng tham số URL `tool` để tải lại trang vẫn quay lại đúng tool
+- Sidebar có ghi chú nhắc nhấn **Ctrl + F5** khi trang hiển thị lỗi hoặc bất thường
 - Hỗ trợ **drag & drop** ảnh
 - Responsive trên màn hình nhỏ
 
