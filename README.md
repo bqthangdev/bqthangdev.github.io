@@ -7,17 +7,22 @@ Không có backend, toàn bộ xử lý chạy trên trình duyệt.
 
 | Tính năng | Mô tả |
 |---|---|
+| **Markdown Reader** | Tải lên file `.md` hoặc paste nội dung Markdown, xem preview với hai chế độ side-by-side và below (lưu lựa chọn vào `localStorage`); ở chế độ below editor mặc định thu gọn (~2 dòng) và có thể mở rộng; hỗ trợ Memory mode lưu nội dung editor vào `localStorage`; xuất preview ra PDF |
 | **String Length** | Paste chuỗi bất kỳ để xem tổng ký tự, ký tự không kể space, số từ và số dòng |
 | **Image to Base64** | Tải lên một hoặc nhiều ảnh, chuyển đổi sang chuỗi Base64 hoặc Data URL |
 | **Text Compare** | Dán hai đoạn văn bản, so sánh từng dòng và highlight chính xác các ký tự khác nhau |
-| **Markdown Reader** | Tải lên file `.md` hoặc paste nội dung Markdown, xem preview với hai chế độ side-by-side và below; hỗ trợ Memory mode lưu nội dung editor vào `localStorage`; xuất preview ra PDF |
 | **Case Converter** | Chuyển đổi text sang camelCase, snake_case, PascalCase, kebab-case và 11 định dạng khác |
+| **Settings** | Quản lý theme Dark/Light và cài đặt `localStorage` của tool (Markdown Reader: view mode, Memory On/Off, Clear saved content); nút reset về mặc định |
+| **Changelog** | Nhật ký hiệu chỉnh theo từng lần cập nhật |
+| **About** | Thông tin tác giả |
 
 ## Tính năng khác
 
-- Chuyển đổi giao diện **Dark / Light**, lưu tuỳ chọn vào `localStorage`
+- Chuyển đổi giao diện **Dark / Light** (sidebar hoặc Settings), lưu vào `localStorage`
 - Markdown Reader hỗ trợ **Memory mode** để tự lưu và khôi phục nội dung editor trên cùng trình duyệt
-- Giữ tool đang mở bằng tham số URL `tool` để tải lại trang vẫn quay lại đúng tool
+- Markdown Reader nhớ chế độ xem **Side by side / Below** qua `localStorage`
+- Tab **Settings** quản lý theme và cài đặt tool; Memory dùng nút On/Off; Clear saved content làm mờ khi Memory Off
+- Giữ tool đang mở bằng tham số URL `tool`; nếu không có param thì mặc định mở **Markdown Reader**
 - Sidebar có ghi chú nhắc nhấn **Ctrl + F5** khi trang hiển thị lỗi hoặc bất thường
 - Hỗ trợ **drag & drop** ảnh
 - Responsive trên màn hình nhỏ

@@ -8,7 +8,8 @@
      5. Image to Base64 — chuyển ảnh sang base64 / data URL
      6. Text Compare   — so sánh hai đoạn văn bản theo từng dòng
      7. Markdown Reader — đọc và render file Markdown
-     8. Case Converter   — chuyển đổi text sang nhiều định dạng case
+     8. Settings       — quản lý localStorage của tool
+     9. Case Converter   — chuyển đổi text sang nhiều định dạng case
 ═══════════════════════════════════════════════════════════════ */
 
 
@@ -28,16 +29,24 @@ function applyThemeIcons(mode) {
   if (label) label.textContent = isLight ? 'Dark mode' : 'Light mode';
 }
 
+/** Áp dụng theme dark|light, lưu localStorage, đồng bộ sidebar + Settings */
+function applyTheme(mode) {
+  const isLight = mode === 'light';
+  document.body.classList.toggle('light', isLight);
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  applyThemeIcons(isLight ? 'light' : 'dark');
+  document.querySelectorAll('.settings-theme').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.settingsTheme === (isLight ? 'light' : 'dark'));
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
 
   /* Đồng bộ icon với trạng thái đã được áp dụng ở trên */
   applyThemeIcons(document.body.classList.contains('light') ? 'light' : 'dark');
 
   document.getElementById('theme-toggle').addEventListener('click', () => {
-    const isLight = document.body.classList.toggle('light');
-    const mode = isLight ? 'light' : 'dark';
-    localStorage.setItem('theme', mode); // lưu để giữ khi reload
-    applyThemeIcons(mode);
+    applyTheme(document.body.classList.contains('light') ? 'dark' : 'light');
   });
 
 
@@ -49,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
      và id của section (id = "page-" + data-page).
   ─────────────────────────────────────────────────────────────── */
   const navItems = document.querySelectorAll('.nav-item');
-  const defaultPage = 'string-length';
+  const defaultPage = 'markdown-reader';
 
   const setActivePage = target => {
     const activeBtn = document.querySelector(`.nav-item[data-page="${target}"]`);
@@ -178,6 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const mrInput     = document.getElementById('mr-input');
   const mrPreview   = document.getElementById('mr-preview');
   const mrContainer = document.getElementById('mr-container');
+  const mrEditorToggle = document.getElementById('mr-editor-toggle');
   const mrMemoryToggle = document.getElementById('mr-memory-toggle');
   const mrMemoryClear  = document.getElementById('mr-memory-clear');
 
@@ -185,6 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const MR_MEMORY_MODE_KEY = MR_STORAGE_PREFIX + 'memory-mode';
   const MR_MEMORY_COUNT_KEY = MR_STORAGE_PREFIX + 'memory-chunk-count';
   const MR_MEMORY_CHUNK_PREFIX = MR_STORAGE_PREFIX + 'memory-content:';
+  const MR_VIEW_MODE_KEY = MR_STORAGE_PREFIX + 'view-mode';
   const MR_MEMORY_CHUNK_SIZE = 200000;
   let mrMemoryEnabled = localStorage.getItem(MR_MEMORY_MODE_KEY) === 'true';
 
@@ -251,13 +262,33 @@ document.addEventListener('DOMContentLoaded', () => {
     mrMemoryClear.hidden = !mrMemoryEnabled;
   };
 
+  /* Đồng bộ chevron + aria theo trạng thái thu gọn editor (chỉ dùng ở below) */
+  const mrApplyEditorCollapsed = () => {
+    const collapsed = mrContainer.classList.contains('mr-editor-collapsed');
+    const chevron = mrEditorToggle.querySelector('.mr-editor-chevron');
+    mrEditorToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    mrEditorToggle.title = collapsed ? 'Expand editor' : 'Collapse editor';
+    if (chevron) chevron.textContent = collapsed ? '▸' : '▾';
+  };
+
   const mrResizeEditor = () => {
-    if (!mrContainer.classList.contains('mr-below')) {
+    if (!mrContainer.classList.contains('mr-below') || mrContainer.classList.contains('mr-editor-collapsed')) {
       mrInput.style.height = '';
       return;
     }
     mrInput.style.height = 'auto';
     mrInput.style.height = (mrInput.scrollHeight + 2) + 'px';
+  };
+
+  /* Áp dụng chế độ xem split|below, đồng bộ nút toggle; below mặc định thu gọn editor */
+  const mrApplyView = view => {
+    const mode = view === 'below' ? 'below' : 'split';
+    document.querySelectorAll('.mr-toggle').forEach(b => {
+      b.classList.toggle('active', b.dataset.view === mode);
+    });
+    mrContainer.className = 'mr-container mr-' + mode + (mode === 'below' ? ' mr-editor-collapsed' : '');
+    mrApplyEditorCollapsed();
+    mrResizeEditor();
   };
 
   const mrHandleInput = () => {
@@ -277,6 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mrClearMemoryContent();
   }
   mrApplyMemoryControls();
+  mrApplyView(localStorage.getItem(MR_VIEW_MODE_KEY));
   mrRender();
   mrResizeEditor();
 
@@ -334,13 +366,20 @@ document.addEventListener('DOMContentLoaded', () => {
     showToast('Markdown memory cleared.');
   });
 
-  /* Chuyển chế độ xem: split ↔ below */
+  /* Thu gọn / mở editor — chỉ có hiệu lực ở chế độ below */
+  mrEditorToggle.addEventListener('click', () => {
+    if (!mrContainer.classList.contains('mr-below')) return;
+    mrContainer.classList.toggle('mr-editor-collapsed');
+    mrApplyEditorCollapsed();
+    mrResizeEditor();
+  });
+
+  /* Chuyển chế độ xem: split ↔ below — lưu lựa chọn vào localStorage */
   document.querySelectorAll('.mr-toggle').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.mr-toggle').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      mrContainer.className = 'mr-container mr-' + btn.dataset.view;
-      mrResizeEditor();
+      const view = btn.dataset.view;
+      localStorage.setItem(MR_VIEW_MODE_KEY, view);
+      mrApplyView(view);
     });
   });
 
@@ -368,7 +407,80 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 
-  /* ─── 8. CASE CONVERTER ────────────────────────────────────────
+  /* ─── SETTINGS ─────────────────────────────────────────────────
+     Quản lý localStorage: Theme + các tool có lưu cài đặt (Markdown Reader).
+  ─────────────────────────────────────────────────────────────────── */
+  const settingsMrViewBtns = document.querySelectorAll('.settings-mr-view');
+  const settingsMrMemoryBtns = document.querySelectorAll('.settings-mr-memory');
+  const settingsMrMemoryClear  = document.getElementById('settings-mr-memory-clear');
+  const settingsThemeBtns = document.querySelectorAll('.settings-theme');
+
+  /* Đồng bộ UI Settings với giá trị đang lưu */
+  const refreshSettingsUI = () => {
+    const theme = document.body.classList.contains('light') ? 'light' : 'dark';
+    settingsThemeBtns.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.settingsTheme === theme);
+    });
+
+    const view = localStorage.getItem(MR_VIEW_MODE_KEY) === 'below' ? 'below' : 'split';
+    settingsMrViewBtns.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.settingsMrView === view);
+    });
+
+    const memOn = localStorage.getItem(MR_MEMORY_MODE_KEY) === 'true';
+    settingsMrMemoryBtns.forEach(btn => {
+      btn.classList.toggle('active', (btn.dataset.settingsMrMemory === 'on') === memOn);
+    });
+    settingsMrMemoryClear.disabled = !memOn;
+  };
+
+  /* Xóa toàn bộ key localStorage của Markdown Reader → về mặc định */
+  const resetMarkdownReaderSettings = () => {
+    localStorage.removeItem(MR_VIEW_MODE_KEY);
+    localStorage.removeItem(MR_MEMORY_MODE_KEY);
+    mrClearMemoryContent();
+  };
+
+  settingsThemeBtns.forEach(btn => {
+    btn.addEventListener('click', () => applyTheme(btn.dataset.settingsTheme));
+  });
+
+  settingsMrViewBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const view = btn.dataset.settingsMrView;
+      localStorage.setItem(MR_VIEW_MODE_KEY, view);
+      mrApplyView(view);
+      refreshSettingsUI();
+    });
+  });
+
+  /* On/Off — chỉ gọi toggle MR khi trạng thái thực sự đổi */
+  settingsMrMemoryBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const wantOn = btn.dataset.settingsMrMemory === 'on';
+      if (mrMemoryEnabled === wantOn) return;
+      mrMemoryToggle.click();
+      refreshSettingsUI();
+    });
+  });
+
+  settingsMrMemoryClear.addEventListener('click', () => {
+    mrMemoryClear.click();
+    refreshSettingsUI();
+  });
+
+  document.getElementById('settings-reset-all').addEventListener('click', () => {
+    if (!confirm('Reset all settings to defaults?')) return;
+    resetMarkdownReaderSettings();
+    localStorage.removeItem('theme'); // mặc định: dark
+    location.reload();
+  });
+
+  document.querySelector('.nav-item[data-page="settings"]').addEventListener('click', refreshSettingsUI);
+  refreshSettingsUI();
+
+
+  /* ─── 9. CASE CONVERTER ────────────────────────────────────────
      Chuyển đổi text sang các định dạng case: camelCase, snake_case, v.v.
      Xử lý từng dòng độc lập. Không cần thư viện ngoài.
   ─────────────────────────────────────────────────────────────────── */

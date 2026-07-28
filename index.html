@@ -19,7 +19,11 @@
 
       <!-- Nav items: data-page phải khớp với id của section bên dưới -->
       <nav class="sidebar-nav">
-        <button class="nav-item active" data-page="string-length">
+        <button class="nav-item active" data-page="markdown-reader">
+          <span class="nav-icon">📝</span>
+          <span class="nav-label">Markdown Reader</span>
+        </button>
+        <button class="nav-item" data-page="string-length">
           <span class="nav-icon">📏</span>
           <span class="nav-label">String Length</span>
         </button>
@@ -31,13 +35,18 @@
           <span class="nav-icon">🔀</span>
           <span class="nav-label">Text Compare</span>
         </button>
-        <button class="nav-item" data-page="markdown-reader">
-          <span class="nav-icon">📝</span>
-          <span class="nav-label">Markdown Reader</span>
-        </button>
         <button class="nav-item" data-page="case-converter">
           <span class="nav-icon">🔤</span>
           <span class="nav-label">Case Converter</span>
+        </button>
+        <button class="nav-item" data-page="settings">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-label">Settings</span>
+        </button>
+        <button class="nav-item" data-page="changelog">
+          <span class="nav-icon">📋</span>
+          <span class="nav-label">Changelog</span>
+          <span class="nav-attention" title="New updates" aria-label="New updates">✨</span>
         </button>
         <button class="nav-item" data-page="about">
           <span class="nav-icon">👤</span>
@@ -59,8 +68,8 @@
     <!-- ── Main content ────────────────────────────────────── -->
     <main class="content">
 
-      <!-- Section: String Length (hiển thị mặc định) -->
-      <section class="page active" id="page-string-length">
+      <!-- Section: String Length (ẩn mặc định) -->
+      <section class="page" id="page-string-length">
         <div class="page-header">
           <h1>String Length Checker</h1>
           <p class="page-desc">Paste your string below to check its length.</p>
@@ -175,8 +184,8 @@
         </div>
       </section>
 
-      <!-- Section: Markdown Reader (ẩn mặc định) -->
-      <section class="page" id="page-markdown-reader">
+      <!-- Section: Markdown Reader (hiển thị mặc định khi không có ?tool=) -->
+      <section class="page active" id="page-markdown-reader">
         <div class="page-header">
           <h1>Markdown Reader</h1>
           <p class="page-desc">Upload a .md file or paste Markdown content to preview it.</p>
@@ -185,7 +194,8 @@
             <ul>
               <li>Nhấn <strong>Load .md file</strong> để tải file Markdown từ máy, hoặc paste trực tiếp vào ô bên trái.</li>
               <li>Preview tự động cập nhật theo thời gian thực khi bạn nhập.</li>
-              <li>Chọn <strong>Side by side</strong> để xem song song hoặc <strong>Below</strong> để xem bên dưới.</li>
+              <li>Chọn <strong>Side by side</strong> hoặc <strong>Below</strong> — lựa chọn được lưu trên trình duyệt và khôi phục khi tải lại trang.</li>
+              <li>Ở chế độ <strong>Below</strong>, phần editor mặc định thu gọn (~2 dòng); nhấn nhãn <strong>Markdown</strong> để mở rộng / thu gọn lại.</li>
               <li>Nhấn <strong>Clear</strong> để xóa nội dung và reset preview.</li>
               <li>Bật <strong>Memory</strong> để tự lưu nội dung editor vào trình duyệt và khôi phục sau khi tải lại trang; dùng <strong>Clear memory</strong> để xóa nội dung đã lưu.</li>
               <li>Nhấn <strong>Export PDF</strong> để xuất nội dung preview ra file PDF (qua hộp thoại in của trình duyệt).</li>
@@ -210,8 +220,10 @@
 
         <!-- Editor + Preview (class mr-split hoặc mr-below) -->
         <div class="mr-container mr-split" id="mr-container">
-          <div class="mr-panel">
-            <span class="mr-panel-label">Markdown</span>
+          <div class="mr-panel mr-editor-panel">
+            <button type="button" class="mr-panel-label mr-editor-toggle" id="mr-editor-toggle" aria-expanded="true">
+              Markdown <span class="mr-editor-chevron" aria-hidden="true">▾</span>
+            </button>
             <textarea id="mr-input" class="textarea mr-textarea" placeholder="Paste Markdown here..." spellcheck="false"></textarea>
           </div>
           <div class="mr-panel">
@@ -291,6 +303,89 @@
               <span>bqthang.dev@gmail.com</span>
             </a>
           </div>
+        </div>
+      </section>
+
+      <!-- Section: Settings — quản lý localStorage (theme + tool) -->
+      <section class="page" id="page-settings">
+        <div class="page-header">
+          <h1>Settings</h1>
+          <p class="page-desc">Manage theme and stored preferences for tools that use localStorage.</p>
+          <details class="guide">
+            <summary>💡 Hướng dẫn sử dụng</summary>
+            <ul>
+              <li>Chỉnh <strong>Theme</strong> (Dark / Light) tại đây hoặc bằng nút ở cuối sidebar — hai nơi đồng bộ với nhau.</li>
+              <li>Chỉ liệt kê các tool đang lưu cài đặt vào <code>localStorage</code> (hiện tại: <strong>Markdown Reader</strong>).</li>
+              <li>Đổi <strong>View mode</strong> hoặc <strong>Memory</strong> (On / Off) tại đây sẽ đồng bộ với tool tương ứng; khi Memory Off, nút <strong>Clear saved content</strong> bị làm mờ và không nhấn được.</li>
+              <li>Nhấn <strong>Reset all to defaults</strong> để xóa toàn bộ cài đặt đã lưu (gồm theme) và khôi phục mặc định.</li>
+            </ul>
+          </details>
+        </div>
+
+        <div class="card settings-tool">
+          <h2 class="settings-tool-title">Appearance</h2>
+          <p class="settings-tool-desc">Color theme for the whole app.</p>
+
+          <div class="settings-row">
+            <span class="settings-label">Theme</span>
+            <div class="settings-controls">
+              <button type="button" class="btn btn-secondary settings-theme" data-settings-theme="dark">Dark</button>
+              <button type="button" class="btn btn-secondary settings-theme" data-settings-theme="light">Light</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card settings-tool">
+          <h2 class="settings-tool-title">Markdown Reader</h2>
+          <p class="settings-tool-desc">View layout and Memory mode saved in this browser.</p>
+
+          <div class="settings-row">
+            <span class="settings-label">View mode</span>
+            <div class="settings-controls">
+              <button type="button" class="btn btn-secondary settings-mr-view" data-settings-mr-view="split">Side by side</button>
+              <button type="button" class="btn btn-secondary settings-mr-view" data-settings-mr-view="below">Below</button>
+            </div>
+          </div>
+
+          <div class="settings-row">
+            <span class="settings-label">Memory</span>
+            <div class="settings-controls">
+              <button type="button" class="btn btn-secondary settings-mr-memory" data-settings-mr-memory="on">On</button>
+              <button type="button" class="btn btn-secondary settings-mr-memory" data-settings-mr-memory="off">Off</button>
+            </div>
+          </div>
+
+          <div class="settings-row">
+            <span class="settings-label">Saved content</span>
+            <div class="settings-controls">
+              <button type="button" class="btn btn-secondary" id="settings-mr-memory-clear">Clear saved content</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card settings-reset-card">
+          <p class="settings-reset-desc">Clear all saved preferences (theme and tools) and restore defaults.</p>
+          <button type="button" class="btn btn-danger" id="settings-reset-all">Reset all to defaults</button>
+        </div>
+      </section>
+
+      <!-- Section: Changelog -->
+      <section class="page" id="page-changelog">
+        <div class="page-header">
+          <h1>Changelog</h1>
+        </div>
+        <div class="changelog">
+          <article class="card changelog-entry">
+            <h3 class="changelog-date">2026-07-28</h3>
+            <ul>
+              <li>Chuyển <strong>Markdown Reader</strong> lên đầu sidebar và đặt làm tool mặc định khi không có tham số <code>?tool=</code>.</li>
+              <li>Ở chế độ <strong>Below</strong>, phần editor mặc định thu gọn (~2 dòng); nhấn nhãn <strong>Markdown</strong> để mở rộng / thu gọn.</li>
+              <li>Lưu lựa chọn chế độ xem <strong>Side by side</strong> / <strong>Below</strong> vào <code>localStorage</code>.</li>
+              <li>Tách <strong>About</strong> và <strong>Changelog</strong> thành hai tab riêng; icon ✨ nổi bật trên tab Changelog.</li>
+              <li>Thêm tab <strong>Settings</strong>: chỉnh theme Dark/Light, quản lý cài đặt Markdown Reader (view mode, Memory), kèm <strong>Reset all to defaults</strong>.</li>
+              <li>Settings — Memory dùng nút <strong>On / Off</strong>; <strong>Clear saved content</strong> nằm mục riêng bên dưới và bị làm mờ khi Memory Off.</li>
+            </ul>
+          </article>
         </div>
       </section>
 

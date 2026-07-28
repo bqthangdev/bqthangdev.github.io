@@ -157,6 +157,22 @@ body {
 .nav-icon { font-size: 1rem; flex-shrink: 0; }
 .nav-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+/* Icon chú ý sau Changelog — nhún nhẹ để thu hút */
+.nav-attention {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 0.95rem;
+  line-height: 1;
+  animation: nav-attention-bob 1.2s ease-in-out infinite;
+}
+@keyframes nav-attention-bob {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-2px) scale(1.18); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-attention { animation: none; }
+}
+
 /* ── Main content ───────────────────────────────────────────── */
 .content {
   margin-left: var(--sidebar-w);
@@ -314,6 +330,15 @@ body {
   border: 1px solid var(--border);
 }
 .btn-secondary:hover { background: var(--border); }
+
+.btn:disabled,
+.btn:disabled:hover {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: var(--bg-card2);
+  color: var(--text-muted);
+  pointer-events: none;
+}
 
 /* ── Image to Base64 ────────────────────────────────────────── */
 .drop-zone {
@@ -572,12 +597,49 @@ body {
   letter-spacing: 0.05em;
 }
 
+/* Nút thu gọn editor — chỉ tương tác được ở chế độ below */
+.mr-editor-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: default;
+}
+.mr-container.mr-below .mr-editor-toggle {
+  cursor: pointer;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+.mr-container.mr-below .mr-editor-toggle:hover { color: var(--text); }
+.mr-editor-chevron { display: none; font-size: 0.75rem; line-height: 1; }
+.mr-container.mr-below .mr-editor-chevron { display: inline; }
+
 /* Textarea editor — flex: 1 để lấp đầy panel */
 .mr-textarea { flex: 1; min-height: 0; resize: none; }
 .mr-container.mr-below .mr-textarea {
   flex: none;
   min-height: 260px;
   overflow-y: hidden;
+}
+
+/* Below + thu gọn: hiện ~2 dòng editor, preview chiếm phần còn lại */
+.mr-container.mr-below.mr-editor-collapsed .mr-editor-panel {
+  flex: none;
+  min-height: 0;
+}
+.mr-container.mr-below.mr-editor-collapsed .mr-textarea {
+  height: calc(3.2em + 30px); /* 2 dòng (line-height 1.6) + padding 28px + border 2px */
+  min-height: 0;
+  overflow: hidden;
+}
+.mr-container.mr-below.mr-editor-collapsed .mr-panel:last-child {
+  flex: 1;
+  min-height: 0;
 }
 
 /* Vùng preview */
@@ -757,6 +819,89 @@ body {
   flex-shrink: 0;
 }
 
+/* ── Settings ────────────────────────────────────────────────── */
+.settings-tool-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+.settings-tool-desc,
+.settings-reset-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+.settings-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.settings-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.settings-mr-view.active,
+.settings-mr-memory.active,
+.settings-theme.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+.settings-reset-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.settings-reset-card .settings-reset-desc { margin-bottom: 0; }
+
+/* Changelog — mỗi lần cập nhật là một card full-width (nền --bg-card = trắng ở light mode) */
+.changelog {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+.changelog .changelog-entry {
+  width: 100%;
+  margin-bottom: 0;
+}
+.changelog-date {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 8px;
+}
+.changelog ul {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--text);
+  line-height: 1.65;
+  font-size: 0.92rem;
+}
+.changelog li + li { margin-top: 6px; }
+.changelog code {
+  font-family: 'Cascadia Code', 'Fira Code', monospace;
+  font-size: 0.85em;
+  background: var(--bg-card2);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
 /* ── Toast ──────────────────────────────────────────────────── */
 .toast {
   position: fixed;
@@ -789,6 +934,14 @@ body {
   .nav-label { display: none; }
   .sidebar-note { display: none; }
   .nav-item { justify-content: center; padding: 10px; }
+  .nav-item[data-page="changelog"] { position: relative; }
+  .nav-attention {
+    margin-left: 0;
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 0.65rem;
+  }
   .theme-toggle { justify-content: center; padding: 10px; }
   .logo { display: none; }
   .content { padding: 24px 16px; }
