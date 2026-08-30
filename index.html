@@ -195,6 +195,8 @@
               <li>Nhấn <strong>Load .md file</strong> để tải file Markdown từ máy, hoặc paste trực tiếp vào ô bên trái.</li>
               <li>Preview tự động cập nhật theo thời gian thực khi bạn nhập.</li>
               <li>Chọn <strong>Side by side</strong> hoặc <strong>Below</strong> — lựa chọn được lưu trên trình duyệt và khôi phục khi tải lại trang.</li>
+              <li>Ở chế độ <strong>Side by side</strong>, <strong>Sync scroll</strong> (mặc định bật) đồng bộ cuộn giữa editor và preview; tắt thì mỗi bên cuộn độc lập. Nút chỉ hiện ở chế độ này.</li>
+              <li>Bật <strong>Focus</strong> (Side by side hoặc Below) để ẩn tiêu đề / hướng dẫn và tăng chỗ cho editor + preview (mặc định tắt). Ở Side by side, cuộn chỉ trong từng panel, không kéo trang.</li>
               <li>Ở chế độ <strong>Below</strong>, phần editor mặc định thu gọn (~2 dòng); nhấn nhãn <strong>Markdown</strong> để mở rộng / thu gọn lại.</li>
               <li>Nhấn <strong>Clear</strong> để xóa nội dung và reset preview.</li>
               <li>Bật <strong>Memory</strong> để tự lưu nội dung editor vào trình duyệt và khôi phục sau khi tải lại trang; dùng <strong>Clear memory</strong> để xóa nội dung đã lưu.</li>
@@ -210,6 +212,8 @@
           <div class="mr-toolbar-right">
             <button class="btn btn-secondary mr-toggle active" data-view="split">Side by side</button>
             <button class="btn btn-secondary mr-toggle" data-view="below">Below</button>
+            <button class="btn btn-secondary mr-sync-toggle" id="mr-sync-toggle">Sync scroll: On</button>
+            <button class="btn btn-secondary mr-focus-toggle" id="mr-focus-toggle">Focus: Off</button>
             <button class="btn btn-secondary mr-memory-toggle" id="mr-memory-toggle">Memory: Off</button>
             <button class="btn btn-secondary" id="mr-memory-clear" hidden>Clear memory</button>
             <button class="btn btn-secondary" id="mr-clear">Clear</button>
@@ -316,7 +320,7 @@
             <ul>
               <li>Chỉnh <strong>Theme</strong> (Dark / Light) tại đây hoặc bằng nút ở cuối sidebar — hai nơi đồng bộ với nhau.</li>
               <li>Chỉ liệt kê các tool đang lưu cài đặt vào <code>localStorage</code> (hiện tại: <strong>Markdown Reader</strong>).</li>
-              <li>Đổi <strong>View mode</strong> hoặc <strong>Memory</strong> (On / Off) tại đây sẽ đồng bộ với tool tương ứng; khi Memory Off, nút <strong>Clear saved content</strong> bị làm mờ và không nhấn được.</li>
+              <li>Đổi <strong>View mode</strong>, <strong>Sync scroll</strong>, <strong>Focus</strong> hoặc <strong>Memory</strong> (On / Off) tại đây sẽ đồng bộ với tool tương ứng; Sync scroll chỉ có hiệu lực ở Side by side; Focus dùng được ở cả hai chế độ xem; khi Memory Off, nút <strong>Clear saved content</strong> bị làm mờ và không nhấn được.</li>
               <li>Nhấn <strong>Reset all to defaults</strong> để xóa toàn bộ cài đặt đã lưu (gồm theme) và khôi phục mặc định.</li>
             </ul>
           </details>
@@ -337,13 +341,29 @@
 
         <div class="card settings-tool">
           <h2 class="settings-tool-title">Markdown Reader</h2>
-          <p class="settings-tool-desc">View layout and Memory mode saved in this browser.</p>
+          <p class="settings-tool-desc">View layout, Sync scroll, Focus and Memory mode saved in this browser.</p>
 
           <div class="settings-row">
             <span class="settings-label">View mode</span>
             <div class="settings-controls">
               <button type="button" class="btn btn-secondary settings-mr-view" data-settings-mr-view="split">Side by side</button>
               <button type="button" class="btn btn-secondary settings-mr-view" data-settings-mr-view="below">Below</button>
+            </div>
+          </div>
+
+          <div class="settings-row">
+            <span class="settings-label">Sync scroll</span>
+            <div class="settings-controls">
+              <button type="button" class="btn btn-secondary settings-mr-sync" data-settings-mr-sync="on">On</button>
+              <button type="button" class="btn btn-secondary settings-mr-sync" data-settings-mr-sync="off">Off</button>
+            </div>
+          </div>
+
+          <div class="settings-row">
+            <span class="settings-label">Focus</span>
+            <div class="settings-controls">
+              <button type="button" class="btn btn-secondary settings-mr-focus" data-settings-mr-focus="on">On</button>
+              <button type="button" class="btn btn-secondary settings-mr-focus" data-settings-mr-focus="off">Off</button>
             </div>
           </div>
 
@@ -375,6 +395,13 @@
           <h1>Changelog</h1>
         </div>
         <div class="changelog">
+          <article class="card changelog-entry">
+            <h3 class="changelog-date">2026-08-30</h3>
+            <ul>
+              <li>Markdown Reader — chế độ <strong>Side by side</strong>: thêm <strong>Sync scroll</strong> (mặc định bật, hai chiều editor ↔ preview); tắt thì mỗi bên cuộn độc lập. Lưu vào <code>localStorage</code> / Settings. Nút ẩn và không có hiệu lực ở chế độ <strong>Below</strong>.</li>
+              <li>Markdown Reader — nút <strong>Focus</strong> (mặc định tắt) ẩn tiêu đề / hướng dẫn ở cả Side by side và Below để tăng chỗ editor + preview; Side by side khóa viewport (không cuộn trang). Nền editor dùng màu card (trắng ở light mode).</li>
+            </ul>
+          </article>
           <article class="card changelog-entry">
             <h3 class="changelog-date">2026-07-28</h3>
             <ul>

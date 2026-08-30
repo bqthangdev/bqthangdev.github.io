@@ -543,11 +543,23 @@ body {
 .tc-result-view::-webkit-scrollbar-thumb  { background: var(--border); border-radius: 4px; }
 
 /* ── Markdown Reader ─────────────────────────────────────────── */
-/* Page markdown-reader chiếm toàn bộ chiều cao viewport (trừ padding .content) */
+/* Page markdown-reader chiếm tối thiểu chiều cao viewport (trừ padding .content) */
 #page-markdown-reader.active {
   display: flex;
   flex-direction: column;
   min-height: calc(100vh - 72px); /* 72px = 36px top + 36px bottom padding của .content */
+}
+
+/* Split: khóa chiều cao viewport — cuộn chỉ trong editor/preview, không kéo trang */
+#page-markdown-reader.active:has(.mr-container.mr-split) {
+  height: calc(100vh - 72px);
+  max-height: calc(100vh - 72px);
+  overflow: hidden;
+}
+
+/* Focus On: ẩn tiêu đề / hướng dẫn để tăng chỗ cho editor + preview */
+#page-markdown-reader.mr-focus > .page-header {
+  display: none;
 }
 
 .mr-toolbar {
@@ -556,6 +568,7 @@ body {
   gap: 8px;
   margin-bottom: 16px;
   flex-wrap: wrap;
+  flex-shrink: 0;
 }
 .mr-toolbar-right { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
 
@@ -566,10 +579,18 @@ body {
   border-color: var(--primary);
 }
 
-.mr-memory-toggle.active {
+.mr-memory-toggle.active,
+.mr-sync-toggle.active,
+.mr-focus-toggle.active {
   background: var(--primary);
   color: #fff;
   border-color: var(--primary);
+}
+
+/* Chặn scroll chaining ra trang khi hết cuộn trong panel (split) */
+.mr-container.mr-split .mr-textarea,
+.mr-container.mr-split .mr-preview {
+  overscroll-behavior: contain;
 }
 
 /* Container chứa editor + preview — grow fill phần còn lại của page */
@@ -619,8 +640,14 @@ body {
 .mr-editor-chevron { display: none; font-size: 0.75rem; line-height: 1; }
 .mr-container.mr-below .mr-editor-chevron { display: inline; }
 
-/* Textarea editor — flex: 1 để lấp đầy panel */
-.mr-textarea { flex: 1; min-height: 0; resize: none; }
+/* Textarea editor — nền trùng preview (--bg-card = trắng ở light) cho dễ đọc */
+.mr-textarea {
+  flex: 1;
+  min-height: 0;
+  resize: none;
+  overflow-y: auto;
+  background: var(--bg-card);
+}
 .mr-container.mr-below .mr-textarea {
   flex: none;
   min-height: 260px;
@@ -854,6 +881,8 @@ body {
   flex-wrap: wrap;
 }
 .settings-mr-view.active,
+.settings-mr-sync.active,
+.settings-mr-focus.active,
 .settings-mr-memory.active,
 .settings-theme.active {
   background: var(--primary);
@@ -948,6 +977,15 @@ body {
   .stats-row { gap: 8px; }
   .stat-value { font-size: 1.4rem; }
   .result-actions { flex-wrap: wrap; }
+
+  /* Padding .content thu còn 24px × 2 = 48px */
+  #page-markdown-reader.active {
+    min-height: calc(100vh - 48px);
+  }
+  #page-markdown-reader.active:has(.mr-container.mr-split) {
+    height: calc(100vh - 48px);
+    max-height: calc(100vh - 48px);
+  }
 }
 
 /* ── Print / Export PDF ─────────────────────────────────────── */

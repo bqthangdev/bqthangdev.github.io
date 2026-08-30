@@ -187,17 +187,27 @@ document.addEventListener('DOMContentLoaded', () => {
   const mrInput     = document.getElementById('mr-input');
   const mrPreview   = document.getElementById('mr-preview');
   const mrContainer = document.getElementById('mr-container');
+  const mrPage      = document.getElementById('page-markdown-reader');
   const mrEditorToggle = document.getElementById('mr-editor-toggle');
   const mrMemoryToggle = document.getElementById('mr-memory-toggle');
   const mrMemoryClear  = document.getElementById('mr-memory-clear');
+  const mrSyncToggle   = document.getElementById('mr-sync-toggle');
+  const mrFocusToggle  = document.getElementById('mr-focus-toggle');
 
   const MR_STORAGE_PREFIX = 'devtools:markdown-reader:';
   const MR_MEMORY_MODE_KEY = MR_STORAGE_PREFIX + 'memory-mode';
   const MR_MEMORY_COUNT_KEY = MR_STORAGE_PREFIX + 'memory-chunk-count';
   const MR_MEMORY_CHUNK_PREFIX = MR_STORAGE_PREFIX + 'memory-content:';
   const MR_VIEW_MODE_KEY = MR_STORAGE_PREFIX + 'view-mode';
+  const MR_SYNC_SCROLL_KEY = MR_STORAGE_PREFIX + 'sync-scroll';
+  const MR_FOCUS_MODE_KEY = MR_STORAGE_PREFIX + 'focus-mode';
   const MR_MEMORY_CHUNK_SIZE = 200000;
   let mrMemoryEnabled = localStorage.getItem(MR_MEMORY_MODE_KEY) === 'true';
+  /* Mặc định bật Sync scroll khi chưa có key */
+  let mrSyncScrollEnabled = localStorage.getItem(MR_SYNC_SCROLL_KEY) !== 'false';
+  /* Mặc định tắt Focus khi chưa có key */
+  let mrFocusEnabled = localStorage.getItem(MR_FOCUS_MODE_KEY) === 'true';
+  let mrSyncScrollLock = false;
 
   /* Render nội dung markdown hiện tại vào ô preview */
   const mrRender = () => {
@@ -262,6 +272,19 @@ document.addEventListener('DOMContentLoaded', () => {
     mrMemoryClear.hidden = !mrMemoryEnabled;
   };
 
+  /* Đồng bộ nhãn / active của nút Sync scroll */
+  const mrApplySyncControls = () => {
+    mrSyncToggle.textContent = mrSyncScrollEnabled ? 'Sync scroll: On' : 'Sync scroll: Off';
+    mrSyncToggle.classList.toggle('active', mrSyncScrollEnabled);
+  };
+
+  /* Focus: ẩn page-header ở cả Side by side và Below */
+  const mrApplyFocusControls = () => {
+    mrFocusToggle.textContent = mrFocusEnabled ? 'Focus: On' : 'Focus: Off';
+    mrFocusToggle.classList.toggle('active', mrFocusEnabled);
+    mrPage.classList.toggle('mr-focus', mrFocusEnabled);
+  };
+
   /* Đồng bộ chevron + aria theo trạng thái thu gọn editor (chỉ dùng ở below) */
   const mrApplyEditorCollapsed = () => {
     const collapsed = mrContainer.classList.contains('mr-editor-collapsed');
@@ -287,8 +310,24 @@ document.addEventListener('DOMContentLoaded', () => {
       b.classList.toggle('active', b.dataset.view === mode);
     });
     mrContainer.className = 'mr-container mr-' + mode + (mode === 'below' ? ' mr-editor-collapsed' : '');
+    mrSyncToggle.hidden = mode === 'below'; /* Sync scroll chỉ dùng ở Side by side */
+    mrApplyFocusControls();
     mrApplyEditorCollapsed();
     mrResizeEditor();
+  };
+
+  /* Đồng bộ scroll theo tỷ lệ — chỉ khi Sync bật và đang ở split */
+  const mrSyncScrollFrom = (source, target) => {
+    if (!mrSyncScrollEnabled || mrSyncScrollLock) return;
+    if (!mrContainer.classList.contains('mr-split')) return;
+
+    const sourceMax = source.scrollHeight - source.clientHeight;
+    const targetMax = target.scrollHeight - target.clientHeight;
+    if (sourceMax <= 0 || targetMax <= 0) return;
+
+    mrSyncScrollLock = true;
+    target.scrollTop = (source.scrollTop / sourceMax) * targetMax;
+    requestAnimationFrame(() => { mrSyncScrollLock = false; });
   };
 
   const mrHandleInput = () => {
@@ -308,12 +347,17 @@ document.addEventListener('DOMContentLoaded', () => {
     mrClearMemoryContent();
   }
   mrApplyMemoryControls();
+  mrApplySyncControls();
   mrApplyView(localStorage.getItem(MR_VIEW_MODE_KEY));
   mrRender();
   mrResizeEditor();
 
   /* Cập nhật preview mỗi khi người dùng gõ / paste */
   mrInput.addEventListener('input', mrHandleInput);
+
+  /* Sync scroll: editor ↔ preview (chỉ khi bật và ở split) */
+  mrInput.addEventListener('scroll', () => mrSyncScrollFrom(mrInput, mrPreview));
+  mrPreview.addEventListener('scroll', () => mrSyncScrollFrom(mrPreview, mrInput));
 
   /* Chèn ký tự tab khi nhấn Tab thay vì chuyển focus ra ngoài.
      Dùng dispatchEvent('input') để mọi listener (mrRender, v.v.) chạy
@@ -366,6 +410,20 @@ document.addEventListener('DOMContentLoaded', () => {
     showToast('Markdown memory cleared.');
   });
 
+  /* Bật / tắt Sync scroll — lưu localStorage */
+  mrSyncToggle.addEventListener('click', () => {
+    mrSyncScrollEnabled = !mrSyncScrollEnabled;
+    localStorage.setItem(MR_SYNC_SCROLL_KEY, mrSyncScrollEnabled ? 'true' : 'false');
+    mrApplySyncControls();
+  });
+
+  /* Bật / tắt Focus (ẩn header) — lưu localStorage; dùng cho cả split và below */
+  mrFocusToggle.addEventListener('click', () => {
+    mrFocusEnabled = !mrFocusEnabled;
+    localStorage.setItem(MR_FOCUS_MODE_KEY, mrFocusEnabled ? 'true' : 'false');
+    mrApplyFocusControls();
+  });
+
   /* Thu gọn / mở editor — chỉ có hiệu lực ở chế độ below */
   mrEditorToggle.addEventListener('click', () => {
     if (!mrContainer.classList.contains('mr-below')) return;
@@ -411,6 +469,8 @@ document.addEventListener('DOMContentLoaded', () => {
      Quản lý localStorage: Theme + các tool có lưu cài đặt (Markdown Reader).
   ─────────────────────────────────────────────────────────────────── */
   const settingsMrViewBtns = document.querySelectorAll('.settings-mr-view');
+  const settingsMrSyncBtns = document.querySelectorAll('.settings-mr-sync');
+  const settingsMrFocusBtns = document.querySelectorAll('.settings-mr-focus');
   const settingsMrMemoryBtns = document.querySelectorAll('.settings-mr-memory');
   const settingsMrMemoryClear  = document.getElementById('settings-mr-memory-clear');
   const settingsThemeBtns = document.querySelectorAll('.settings-theme');
@@ -427,6 +487,16 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.classList.toggle('active', btn.dataset.settingsMrView === view);
     });
 
+    const syncOn = localStorage.getItem(MR_SYNC_SCROLL_KEY) !== 'false';
+    settingsMrSyncBtns.forEach(btn => {
+      btn.classList.toggle('active', (btn.dataset.settingsMrSync === 'on') === syncOn);
+    });
+
+    const focusOn = localStorage.getItem(MR_FOCUS_MODE_KEY) === 'true';
+    settingsMrFocusBtns.forEach(btn => {
+      btn.classList.toggle('active', (btn.dataset.settingsMrFocus === 'on') === focusOn);
+    });
+
     const memOn = localStorage.getItem(MR_MEMORY_MODE_KEY) === 'true';
     settingsMrMemoryBtns.forEach(btn => {
       btn.classList.toggle('active', (btn.dataset.settingsMrMemory === 'on') === memOn);
@@ -437,6 +507,8 @@ document.addEventListener('DOMContentLoaded', () => {
   /* Xóa toàn bộ key localStorage của Markdown Reader → về mặc định */
   const resetMarkdownReaderSettings = () => {
     localStorage.removeItem(MR_VIEW_MODE_KEY);
+    localStorage.removeItem(MR_SYNC_SCROLL_KEY);
+    localStorage.removeItem(MR_FOCUS_MODE_KEY);
     localStorage.removeItem(MR_MEMORY_MODE_KEY);
     mrClearMemoryContent();
   };
@@ -450,6 +522,26 @@ document.addEventListener('DOMContentLoaded', () => {
       const view = btn.dataset.settingsMrView;
       localStorage.setItem(MR_VIEW_MODE_KEY, view);
       mrApplyView(view);
+      refreshSettingsUI();
+    });
+  });
+
+  /* Sync scroll On/Off — gọi cùng kênh với nút toolbar */
+  settingsMrSyncBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const wantOn = btn.dataset.settingsMrSync === 'on';
+      if (mrSyncScrollEnabled === wantOn) return;
+      mrSyncToggle.click();
+      refreshSettingsUI();
+    });
+  });
+
+  /* Focus On/Off — gọi cùng kênh với nút toolbar */
+  settingsMrFocusBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const wantOn = btn.dataset.settingsMrFocus === 'on';
+      if (mrFocusEnabled === wantOn) return;
+      mrFocusToggle.click();
       refreshSettingsUI();
     });
   });
