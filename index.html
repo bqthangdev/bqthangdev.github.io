@@ -63,7 +63,13 @@
         <a class="icon-credit nav-label" href="https://www.flaticon.com/free-icons/code"
            target="_blank" rel="noopener" title="code icons">Code icons by Freepik – Flaticon</a>
       </div>
+
+      <!-- Ẩn sidebar — giữa mép phải -->
+      <button type="button" class="sidebar-edge-btn" id="sidebar-hide" title="Hide sidebar" aria-label="Hide sidebar">«</button>
     </aside>
+
+    <!-- Hiện lại sidebar khi đang ẩn — giữa mép trái -->
+    <button type="button" class="sidebar-edge-btn sidebar-show-btn" id="sidebar-show" title="Show sidebar" aria-label="Show sidebar" hidden>»</button>
 
     <!-- ── Main content ────────────────────────────────────── -->
     <main class="content">
@@ -196,6 +202,7 @@
               <li>Preview tự động cập nhật theo thời gian thực khi bạn nhập.</li>
               <li>Chọn <strong>Side by side</strong> hoặc <strong>Below</strong> — lựa chọn được lưu trên trình duyệt và khôi phục khi tải lại trang.</li>
               <li>Ở chế độ <strong>Side by side</strong>, <strong>Sync scroll</strong> (mặc định bật) đồng bộ cuộn giữa editor và preview; tắt thì mỗi bên cuộn độc lập. Nút chỉ hiện ở chế độ này.</li>
+              <li>Ở chế độ <strong>Side by side</strong>, kéo thanh giữa editor và preview để đổi độ rộng (mặc định 50/50; không lưu).</li>
               <li>Bật <strong>Focus</strong> (Side by side hoặc Below) để ẩn tiêu đề / hướng dẫn và tăng chỗ cho editor + preview (mặc định tắt). Ở Side by side, cuộn chỉ trong từng panel, không kéo trang.</li>
               <li>Ở chế độ <strong>Below</strong>, phần editor mặc định thu gọn (~2 dòng); nhấn nhãn <strong>Markdown</strong> để mở rộng / thu gọn lại.</li>
               <li>Nhấn <strong>Clear</strong> để xóa nội dung và reset preview.</li>
@@ -230,7 +237,8 @@
             </button>
             <textarea id="mr-input" class="textarea mr-textarea" placeholder="Paste Markdown here..." spellcheck="false"></textarea>
           </div>
-          <div class="mr-panel">
+          <div class="mr-split-divider" id="mr-split-divider" role="separator" aria-orientation="vertical" title="Drag to resize"></div>
+          <div class="mr-panel mr-preview-panel">
             <span class="mr-panel-label">Preview</span>
             <div class="mr-preview" id="mr-preview"><p class="mr-empty">Preview will appear here.</p></div>
           </div>
@@ -318,23 +326,31 @@
           <details class="guide">
             <summary>💡 Hướng dẫn sử dụng</summary>
             <ul>
-              <li>Chỉnh <strong>Theme</strong> (Dark / Light) tại đây hoặc bằng nút ở cuối sidebar — hai nơi đồng bộ với nhau.</li>
+              <li>Chỉnh <strong>Theme</strong> (Dark / Light) và <strong>Sidebar</strong> (Show / Hide) tại đây — Sidebar cũng ẩn/hiện bằng nút « trên sidebar hoặc » khi đang ẩn; lưu <code>localStorage</code>.</li>
               <li>Chỉ liệt kê các tool đang lưu cài đặt vào <code>localStorage</code> (hiện tại: <strong>Markdown Reader</strong>).</li>
               <li>Đổi <strong>View mode</strong>, <strong>Sync scroll</strong>, <strong>Focus</strong> hoặc <strong>Memory</strong> (On / Off) tại đây sẽ đồng bộ với tool tương ứng; Sync scroll chỉ có hiệu lực ở Side by side; Focus dùng được ở cả hai chế độ xem; khi Memory Off, nút <strong>Clear saved content</strong> bị làm mờ và không nhấn được.</li>
-              <li>Nhấn <strong>Reset all to defaults</strong> để xóa toàn bộ cài đặt đã lưu (gồm theme) và khôi phục mặc định.</li>
+              <li>Nhấn <strong>Reset all to defaults</strong> để xóa toàn bộ cài đặt đã lưu (gồm theme, sidebar) và khôi phục mặc định.</li>
             </ul>
           </details>
         </div>
 
         <div class="card settings-tool">
           <h2 class="settings-tool-title">Appearance</h2>
-          <p class="settings-tool-desc">Color theme for the whole app.</p>
+          <p class="settings-tool-desc">Color theme and sidebar visibility for the whole app.</p>
 
           <div class="settings-row">
             <span class="settings-label">Theme</span>
             <div class="settings-controls">
               <button type="button" class="btn btn-secondary settings-theme" data-settings-theme="dark">Dark</button>
               <button type="button" class="btn btn-secondary settings-theme" data-settings-theme="light">Light</button>
+            </div>
+          </div>
+
+          <div class="settings-row">
+            <span class="settings-label">Sidebar</span>
+            <div class="settings-controls">
+              <button type="button" class="btn btn-secondary settings-sidebar" data-settings-sidebar="show">Show</button>
+              <button type="button" class="btn btn-secondary settings-sidebar" data-settings-sidebar="hide">Hide</button>
             </div>
           </div>
         </div>
@@ -395,6 +411,13 @@
           <h1>Changelog</h1>
         </div>
         <div class="changelog">
+          <article class="card changelog-entry">
+            <h3 class="changelog-date">2026-08-31</h3>
+            <ul>
+              <li>Ẩn/hiện <strong>Sidebar</strong> (nút « / », Settings); lưu <code>localStorage</code> key <code>sidebar</code>; mặc định Show. Reset all khôi phục Show.</li>
+              <li>Markdown Reader — Side by side: kéo thanh giữa để đổi độ rộng editor / preview (mặc định 50/50; không lưu vị trí).</li>
+            </ul>
+          </article>
           <article class="card changelog-entry">
             <h3 class="changelog-date">2026-08-30</h3>
             <ul>

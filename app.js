@@ -19,6 +19,8 @@
 ─────────────────────────────────────────────────────────────── */
 const savedTheme = localStorage.getItem('theme');
 if (savedTheme === 'light') document.body.classList.add('light');
+/* Sidebar: mặc định show; ẩn sớm để tránh nháy layout */
+if (localStorage.getItem('sidebar') === 'hide') document.body.classList.add('sidebar-hidden');
 
 /** Cập nhật icon và label của nút toggle theo chế độ hiện tại */
 function applyThemeIcons(mode) {
@@ -40,14 +42,30 @@ function applyTheme(mode) {
   });
 }
 
+/** Áp dụng sidebar show|hide, lưu localStorage, đồng bộ nút + Settings */
+function applySidebar(mode) {
+  const hide = mode === 'hide';
+  document.body.classList.toggle('sidebar-hidden', hide);
+  localStorage.setItem('sidebar', hide ? 'hide' : 'show');
+  const showBtn = document.getElementById('sidebar-show');
+  if (showBtn) showBtn.hidden = !hide;
+  document.querySelectorAll('.settings-sidebar').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.settingsSidebar === (hide ? 'hide' : 'show'));
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
 
   /* Đồng bộ icon với trạng thái đã được áp dụng ở trên */
   applyThemeIcons(document.body.classList.contains('light') ? 'light' : 'dark');
+  applySidebar(document.body.classList.contains('sidebar-hidden') ? 'hide' : 'show');
 
   document.getElementById('theme-toggle').addEventListener('click', () => {
     applyTheme(document.body.classList.contains('light') ? 'dark' : 'light');
   });
+
+  document.getElementById('sidebar-hide').addEventListener('click', () => applySidebar('hide'));
+  document.getElementById('sidebar-show').addEventListener('click', () => applySidebar('show'));
 
 
   /* ─── 2. NAVIGATION ──────────────────────────────────────────
@@ -188,6 +206,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const mrPreview   = document.getElementById('mr-preview');
   const mrContainer = document.getElementById('mr-container');
   const mrPage      = document.getElementById('page-markdown-reader');
+  const mrEditorPanel  = mrContainer.querySelector('.mr-editor-panel');
+  const mrPreviewPanel = mrContainer.querySelector('.mr-preview-panel');
+  const mrSplitDivider = document.getElementById('mr-split-divider');
   const mrEditorToggle = document.getElementById('mr-editor-toggle');
   const mrMemoryToggle = document.getElementById('mr-memory-toggle');
   const mrMemoryClear  = document.getElementById('mr-memory-clear');
@@ -303,6 +324,12 @@ document.addEventListener('DOMContentLoaded', () => {
     mrInput.style.height = (mrInput.scrollHeight + 2) + 'px';
   };
 
+  /* Đưa tỷ lệ split về 50/50 (không lưu localStorage) */
+  const mrResetSplitWidths = () => {
+    if (mrEditorPanel) mrEditorPanel.style.flex = '';
+    if (mrPreviewPanel) mrPreviewPanel.style.flex = '';
+  };
+
   /* Áp dụng chế độ xem split|below, đồng bộ nút toggle; below mặc định thu gọn editor */
   const mrApplyView = view => {
     const mode = view === 'below' ? 'below' : 'split';
@@ -311,6 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     mrContainer.className = 'mr-container mr-' + mode + (mode === 'below' ? ' mr-editor-collapsed' : '');
     mrSyncToggle.hidden = mode === 'below'; /* Sync scroll chỉ dùng ở Side by side */
+    if (mode === 'below') mrResetSplitWidths();
     mrApplyFocusControls();
     mrApplyEditorCollapsed();
     mrResizeEditor();
@@ -358,6 +386,41 @@ document.addEventListener('DOMContentLoaded', () => {
   /* Sync scroll: editor ↔ preview (chỉ khi bật và ở split) */
   mrInput.addEventListener('scroll', () => mrSyncScrollFrom(mrInput, mrPreview));
   mrPreview.addEventListener('scroll', () => mrSyncScrollFrom(mrPreview, mrInput));
+
+  /* Kéo thanh giữa để đổi độ rộng editor / preview (chỉ split; không lưu) */
+  if (mrSplitDivider && mrEditorPanel && mrPreviewPanel) {
+    let mrSplitDragging = false;
+
+    const mrApplySplitRatio = clientX => {
+      const rect = mrContainer.getBoundingClientRect();
+      const dividerW = mrSplitDivider.offsetWidth;
+      const avail = rect.width - dividerW;
+      if (avail <= 0) return;
+      const minPx = 140;
+      const leftPx = Math.min(Math.max(clientX - rect.left, minPx), avail - minPx);
+      const leftPct = (leftPx / avail) * 100;
+      mrEditorPanel.style.flex = `0 0 ${leftPct}%`;
+      mrPreviewPanel.style.flex = '1 1 0';
+    };
+
+    mrSplitDivider.addEventListener('mousedown', e => {
+      if (!mrContainer.classList.contains('mr-split')) return;
+      e.preventDefault();
+      mrSplitDragging = true;
+      document.body.classList.add('mr-splitting');
+    });
+
+    document.addEventListener('mousemove', e => {
+      if (!mrSplitDragging) return;
+      mrApplySplitRatio(e.clientX);
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (!mrSplitDragging) return;
+      mrSplitDragging = false;
+      document.body.classList.remove('mr-splitting');
+    });
+  }
 
   /* Chèn ký tự tab khi nhấn Tab thay vì chuyển focus ra ngoài.
      Dùng dispatchEvent('input') để mọi listener (mrRender, v.v.) chạy
@@ -474,12 +537,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const settingsMrMemoryBtns = document.querySelectorAll('.settings-mr-memory');
   const settingsMrMemoryClear  = document.getElementById('settings-mr-memory-clear');
   const settingsThemeBtns = document.querySelectorAll('.settings-theme');
+  const settingsSidebarBtns = document.querySelectorAll('.settings-sidebar');
 
   /* Đồng bộ UI Settings với giá trị đang lưu */
   const refreshSettingsUI = () => {
     const theme = document.body.classList.contains('light') ? 'light' : 'dark';
     settingsThemeBtns.forEach(btn => {
       btn.classList.toggle('active', btn.dataset.settingsTheme === theme);
+    });
+
+    const sidebar = document.body.classList.contains('sidebar-hidden') ? 'hide' : 'show';
+    settingsSidebarBtns.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.settingsSidebar === sidebar);
     });
 
     const view = localStorage.getItem(MR_VIEW_MODE_KEY) === 'below' ? 'below' : 'split';
@@ -515,6 +584,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   settingsThemeBtns.forEach(btn => {
     btn.addEventListener('click', () => applyTheme(btn.dataset.settingsTheme));
+  });
+
+  settingsSidebarBtns.forEach(btn => {
+    btn.addEventListener('click', () => applySidebar(btn.dataset.settingsSidebar));
   });
 
   settingsMrViewBtns.forEach(btn => {
@@ -565,6 +638,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!confirm('Reset all settings to defaults?')) return;
     resetMarkdownReaderSettings();
     localStorage.removeItem('theme'); // mặc định: dark
+    localStorage.removeItem('sidebar'); // mặc định: show
     location.reload();
   });
 

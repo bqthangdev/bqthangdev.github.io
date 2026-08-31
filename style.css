@@ -117,7 +117,48 @@ body {
   text-decoration: none;
   color: var(--text);
   display: block;
+  min-width: 0;
 }
+
+/* Nút ẩn/hiện sidebar — giữa cạnh (đồng bộ show / hide) */
+.sidebar-edge-btn {
+  z-index: 20;
+  width: 28px;
+  height: 48px;
+  padding: 0;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  transition: background var(--transition);
+}
+.sidebar-edge-btn:hover { background: var(--bg-card2); }
+
+/* Hide: giữa mép phải sidebar, nhô sang content */
+#sidebar-hide {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translate(50%, -50%);
+  border-radius: 8px;
+}
+
+/* Show: giữa mép trái viewport khi sidebar đang ẩn */
+.sidebar-show-btn {
+  position: fixed;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+}
+
+/* Ẩn sidebar — content full width */
+body.sidebar-hidden .sidebar { display: none; }
+body.sidebar-hidden .content { margin-left: 0; }
 
 .sidebar-nav {
   padding: 12px 10px;
@@ -595,8 +636,41 @@ body {
 
 /* Container chứa editor + preview — grow fill phần còn lại của page */
 .mr-container      { display: flex; gap: 16px; flex: 1; min-height: 0; }
-.mr-container.mr-split { flex-direction: row; }
+.mr-container.mr-split { flex-direction: row; gap: 0; }
 .mr-container.mr-below { flex-direction: column; }
+
+/* Thanh kéo độ rộng editor / preview — chỉ hiện ở Side by side */
+.mr-split-divider {
+  display: none;
+  flex: 0 0 10px;
+  width: 10px;
+  align-self: stretch;
+  cursor: col-resize;
+  position: relative;
+  touch-action: none;
+  user-select: none;
+}
+.mr-container.mr-split .mr-split-divider { display: block; }
+.mr-split-divider::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  background: var(--border);
+  border-radius: 1px;
+  transition: background var(--transition), width var(--transition);
+}
+.mr-split-divider:hover::before,
+body.mr-splitting .mr-split-divider::before {
+  width: 3px;
+  background: var(--primary);
+}
+body.mr-splitting { cursor: col-resize; user-select: none; }
+body.mr-splitting .mr-textarea,
+body.mr-splitting .mr-preview { pointer-events: none; }
 
 /* Trong chế độ below, mỗi panel cần min-height để editor không bị thu nhỏ bất thường */
 .mr-container.mr-below .mr-panel { flex: none; min-height: 260px; }
@@ -610,9 +684,15 @@ body {
   min-width: 0;
   min-height: 0;
 }
+.mr-container.mr-split .mr-panel {
+  flex: 1 1 0;
+  min-width: 140px;
+}
 .mr-panel-label {
+  font-family: inherit;
   font-size: 0.8rem;
   font-weight: 600;
+  line-height: 1.25;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -627,7 +707,9 @@ body {
   padding: 0;
   border: none;
   background: none;
-  font: inherit;
+  /* Không dùng font: inherit (shorthand) — sẽ ghi đè font-size/weight của .mr-panel-label */
+  font-family: inherit;
+  color: inherit;
   text-align: left;
   cursor: default;
 }
@@ -884,6 +966,7 @@ body {
 .settings-mr-sync.active,
 .settings-mr-focus.active,
 .settings-mr-memory.active,
+.settings-sidebar.active,
 .settings-theme.active {
   background: var(--primary);
   color: #fff;
@@ -973,6 +1056,7 @@ body {
   }
   .theme-toggle { justify-content: center; padding: 10px; }
   .logo { display: none; }
+  .sidebar-header { display: none; }
   .content { padding: 24px 16px; }
   .stats-row { gap: 8px; }
   .stat-value { font-size: 1.4rem; }
@@ -995,7 +1079,10 @@ body {
   .page-header,
   .mr-toolbar,
   .mr-panel:first-child,
-  .mr-panel-label { display: none !important; }
+  .mr-split-divider,
+  .mr-panel-label,
+  .sidebar-show-btn,
+  #sidebar-hide { display: none !important; }
 
   /* Đảm bảo chuỗi cha hiển thị đúng */
   .layout { display: block !important; }
