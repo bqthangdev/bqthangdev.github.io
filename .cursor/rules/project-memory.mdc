@@ -8,7 +8,7 @@ alwaysApply: true
 ## Tổng quan
 
 - Trang tĩnh GitHub Pages: HTML / CSS / Vanilla JS (`index.html`, `style.css`, `app.js`).
-- Không backend; xử lý trên trình duyệt. Markdown render qua `marked.js` (CDN).
+- Không backend; xử lý trên trình duyệt. Markdown: `marked.js` (CDN). Hash Encode/Decode: `crypto-js` (CDN).
 - Không thêm framework/build tool trừ khi được yêu cầu rõ.
 
 ## Tools (thứ tự sidebar)
@@ -18,9 +18,10 @@ alwaysApply: true
 3. Image to Base64 (`image-to-base64`)
 4. Text Compare (`text-compare`)
 5. Case Converter (`case-converter`)
-6. Settings (`settings`) — Appearance (theme + sidebar) + localStorage của tool; **Reset all to defaults** (theme → dark, sidebar → show)
-7. Changelog (`changelog`) — icon ✨ (`.nav-attention`); mỗi entry là `.card.changelog-entry` full-width
-8. About (`about`)
+6. **Encode / Decode** (`encode-decode`) — Unicode + MD5/SHA*; Input trái / Result phải; Focus
+7. Settings (`settings`) — Appearance (theme + sidebar) + localStorage của tool; **Reset all to defaults** (theme → dark, sidebar → show)
+8. Changelog (`changelog`) — icon ✨ (`.nav-attention`); mỗi entry là `.card.changelog-entry` full-width
+9. About (`about`)
 
 Navigation: `data-page` ↔ `#page-{data-page}`; URL param `tool`; `defaultPage` trong `app.js`.
 
@@ -33,6 +34,10 @@ Navigation: `data-page` ↔ `#page-{data-page}`; URL param `tool`; `defaultPage`
   - `sync-scroll` — `'true'`|`'false'` (mặc định khi xóa key / thiếu key: **bật**; chỉ có hiệu lực ở Side by side)
   - `focus-mode` — `'true'`|`'false'` (mặc định khi xóa key / thiếu key: **tắt**; Side by side + Below — ẩn `.page-header`)
   - `memory-mode`, `memory-chunk-count`, `memory-content:*`
+- **Encode / Decode**: prefix `devtools:encode-decode:`
+  - `codec` — `unicode`|`md5`|`sha1`|`sha3-256`|`sha3-512`|`sha256`|`sha512` (mặc định **unicode**; key cũ `sha3` → `sha3-256`)
+  - `mode` — `encode`|`decode` (mặc định **encode**; Result cập nhật live theo Input)
+  - `focus-mode` — `'true'`|`'false'` (mặc định Off; class `ed-focus` trên `#page-encode-decode`)
 - Settings liệt kê theme + sidebar + tool có localStorage; khi thêm tool mới nhớ bổ sung card + reset.
 
 ## Markdown Reader
@@ -46,6 +51,15 @@ Navigation: `data-page` ↔ `#page-{data-page}`; URL param `tool`; `defaultPage`
 - Editor (`.mr-textarea`): nền `var(--bg-card)` (trắng ở light) — dễ đọc hơn `--bg-card2`.
 - Memory mode: chunked localStorage. Đổi editor qua `dispatchEvent(new Event('input'))`.
 
+## Encode / Decode
+
+- Chỉ Side by side 50/50; Input trái (`#ed-input`), Result phải (`#ed-result`); Swap `#ed-swap` (⇄) đổi nội dung + đảo Encode↔Decode (hash: chỉ swap, giữ Encode).
+- Toolbar: Type `#ed-codec`, chế độ Encode/Decode (toggle, mặc định Encode), Copy / Clear, Focus `#ed-focus-toggle`.
+- Live convert: `input` debounce 150ms → `#ed-result`; đổi mode/codec convert ngay (`edConvertNow`); Input tối đa **256 KB** UTF-8 (`edEnforceInputLimit`).
+- Unicode: encode `\uXXXX`; decode `\uXXXX` / `\u{...}`. Hash (MD5/SHA*): chỉ Encode → hex; Decode disabled.
+- Focus: class `ed-focus` ẩn `.page-header`; page khóa viewport giống MR split.
+- crypto-js CDN cho hash; SHA3 (256) / SHA3 (512) qua `outputLength`.
+
 ## Quy tắc chỉnh sửa
 
 - Chỉ sửa chỗ liên quan; không để code dư / pattern gọi lệch với code hiện có.
@@ -56,6 +70,7 @@ Navigation: `data-page` ↔ `#page-{data-page}`; URL param `tool`; `defaultPage`
 
 ## Lịch sử quyết định gần đây
 
+- 2026-08-31: Tool Encode / Decode (Unicode mặc định, hash MD5/SHA*, Focus, Swap, Settings); crypto-js CDN.
 - 2026-08-31: Sidebar show/hide (`sidebar` localStorage, mặc định show); MR split divider kéo độ rộng 50/50 không lưu.
 - 2026-08-30: Sync scroll (mặc định On, 2 chiều); Focus (mặc định Off, ẩn header) ở cả Side by side và Below; editor nền `--bg-card`; split khóa viewport; Settings + `focus-mode`.
 - 2026-07-28: Markdown Reader default; Below thu gọn; lưu view-mode; tách About/Changelog; Settings (theme + MR + reset); Memory On/Off + Clear saved content disabled khi Off.

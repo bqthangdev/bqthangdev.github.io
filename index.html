@@ -39,6 +39,10 @@
           <span class="nav-icon">🔤</span>
           <span class="nav-label">Case Converter</span>
         </button>
+        <button class="nav-item" data-page="encode-decode">
+          <span class="nav-icon">🔐</span>
+          <span class="nav-label">Encode / Decode</span>
+        </button>
         <button class="nav-item" data-page="settings">
           <span class="nav-icon">⚙️</span>
           <span class="nav-label">Settings</span>
@@ -297,6 +301,61 @@
         </div>
       </section>
 
+      <!-- Section: Encode / Decode -->
+      <section class="page" id="page-encode-decode">
+        <div class="page-header">
+          <h1>Encode / Decode</h1>
+          <p class="page-desc">Encode or decode text with Unicode escapes or hash algorithms (MD5, SHA family).</p>
+          <details class="guide">
+            <summary>💡 Hướng dẫn sử dụng</summary>
+            <ul>
+              <li>Chọn loại mã ở dropdown trên toolbar (mặc định <strong>Unicode</strong>; lựa chọn được lưu trên trình duyệt).</li>
+              <li>Chế độ mặc định là <strong>Encode</strong>; nhấn <strong>Decode</strong> để đổi chế độ (không xóa nội dung). Gõ hoặc paste vào <strong>Input</strong> (trái) — <strong>Result</strong> (phải) cập nhật sau debounce ngắn.</li>
+              <li>Input tối đa <strong>256 KB</strong> (UTF-8); vượt quá sẽ bị cắt và hiện thông báo.</li>
+              <li>MD5 / SHA* là hàm băm một chiều: chỉ dùng chế độ <strong>Encode</strong>; <strong>Decode</strong> bị tắt.</li>
+              <li>Nút <strong>⇄</strong> hoán đổi nội dung trái ↔ phải và đảo chế độ Encode ↔ Decode. <strong>Copy</strong> sao chép kết quả, <strong>Clear</strong> xóa cả hai ô.</li>
+              <li>Bật <strong>Focus</strong> để ẩn tiêu đề / hướng dẫn và tăng chiều cao hai ô (mặc định tắt).</li>
+            </ul>
+          </details>
+        </div>
+
+        <div class="ed-toolbar">
+          <label class="ed-codec-wrap" for="ed-codec">
+            <span class="ed-codec-label">Type</span>
+            <select id="ed-codec" class="ed-codec-select" aria-label="Codec type">
+              <option value="unicode">Unicode</option>
+              <option value="md5">MD5</option>
+              <option value="sha1">SHA1</option>
+              <option value="sha3-256">SHA3 (256)</option>
+              <option value="sha3-512">SHA3 (512)</option>
+              <option value="sha256">SHA256</option>
+              <option value="sha512">SHA512</option>
+            </select>
+          </label>
+          <div class="ed-toolbar-right">
+            <button type="button" class="btn btn-secondary ed-mode-btn" id="ed-encode" data-ed-mode="encode">Encode</button>
+            <button type="button" class="btn btn-secondary ed-mode-btn" id="ed-decode" data-ed-mode="decode">Decode</button>
+            <button type="button" class="btn btn-secondary" id="ed-copy">Copy</button>
+            <button type="button" class="btn btn-secondary" id="ed-clear">Clear</button>
+            <button type="button" class="btn btn-secondary ed-focus-toggle" id="ed-focus-toggle">Focus: Off</button>
+          </div>
+        </div>
+
+        <div class="ed-container" id="ed-container">
+          <div class="ed-panel">
+            <span class="ed-panel-label">Input</span>
+            <textarea id="ed-input" class="textarea ed-textarea" placeholder="Paste text here..." spellcheck="false"></textarea>
+          </div>
+          <div class="ed-swap-wrap">
+            <button type="button" class="ed-swap-btn" id="ed-swap" title="Swap left and right" aria-label="Swap left and right">⇄</button>
+          </div>
+          <div class="ed-panel">
+            <span class="ed-panel-label">Result</span>
+            <textarea id="ed-result" class="textarea ed-textarea" placeholder="Result will appear here..." spellcheck="false"></textarea>
+          </div>
+        </div>
+      </section>
+
       <!-- Section: About -->
       <section class="page" id="page-about">
         <div class="page-header">
@@ -327,8 +386,9 @@
             <summary>💡 Hướng dẫn sử dụng</summary>
             <ul>
               <li>Chỉnh <strong>Theme</strong> (Dark / Light) và <strong>Sidebar</strong> (Show / Hide) tại đây — Sidebar cũng ẩn/hiện bằng nút « trên sidebar hoặc » khi đang ẩn; lưu <code>localStorage</code>.</li>
-              <li>Chỉ liệt kê các tool đang lưu cài đặt vào <code>localStorage</code> (hiện tại: <strong>Markdown Reader</strong>).</li>
+              <li>Chỉ liệt kê các tool đang lưu cài đặt vào <code>localStorage</code> (hiện tại: <strong>Markdown Reader</strong>, <strong>Encode / Decode</strong>).</li>
               <li>Đổi <strong>View mode</strong>, <strong>Sync scroll</strong>, <strong>Focus</strong> hoặc <strong>Memory</strong> (On / Off) tại đây sẽ đồng bộ với tool tương ứng; Sync scroll chỉ có hiệu lực ở Side by side; Focus dùng được ở cả hai chế độ xem; khi Memory Off, nút <strong>Clear saved content</strong> bị làm mờ và không nhấn được.</li>
+              <li>Encode / Decode: đổi <strong>Type</strong>, <strong>Mode</strong> (Encode/Decode) hoặc <strong>Focus</strong> tại đây đồng bộ với tool; Reset all khôi phục Type = Unicode, Mode = Encode, Focus = Off.</li>
               <li>Nhấn <strong>Reset all to defaults</strong> để xóa toàn bộ cài đặt đã lưu (gồm theme, sidebar) và khôi phục mặc định.</li>
             </ul>
           </details>
@@ -399,6 +459,42 @@
           </div>
         </div>
 
+        <div class="card settings-tool">
+          <h2 class="settings-tool-title">Encode / Decode</h2>
+          <p class="settings-tool-desc">Codec type, Encode/Decode mode and Focus saved in this browser.</p>
+
+          <div class="settings-row">
+            <span class="settings-label">Type</span>
+            <div class="settings-controls">
+              <select id="settings-ed-codec" class="ed-codec-select" aria-label="Encode/Decode type">
+                <option value="unicode">Unicode</option>
+                <option value="md5">MD5</option>
+                <option value="sha1">SHA1</option>
+                <option value="sha3-256">SHA3 (256)</option>
+                <option value="sha3-512">SHA3 (512)</option>
+                <option value="sha256">SHA256</option>
+                <option value="sha512">SHA512</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="settings-row">
+            <span class="settings-label">Mode</span>
+            <div class="settings-controls">
+              <button type="button" class="btn btn-secondary settings-ed-mode" data-settings-ed-mode="encode">Encode</button>
+              <button type="button" class="btn btn-secondary settings-ed-mode" data-settings-ed-mode="decode">Decode</button>
+            </div>
+          </div>
+
+          <div class="settings-row">
+            <span class="settings-label">Focus</span>
+            <div class="settings-controls">
+              <button type="button" class="btn btn-secondary settings-ed-focus" data-settings-ed-focus="on">On</button>
+              <button type="button" class="btn btn-secondary settings-ed-focus" data-settings-ed-focus="off">Off</button>
+            </div>
+          </div>
+        </div>
+
         <div class="card settings-reset-card">
           <p class="settings-reset-desc">Clear all saved preferences (theme and tools) and restore defaults.</p>
           <button type="button" class="btn btn-danger" id="settings-reset-all">Reset all to defaults</button>
@@ -414,6 +510,7 @@
           <article class="card changelog-entry">
             <h3 class="changelog-date">2026-08-31</h3>
             <ul>
+              <li>Thêm tool <strong>Encode / Decode</strong>: Unicode + MD5 / SHA1 / SHA3 (256) / SHA3 (512) / SHA256 / SHA512; dropdown Type (mặc định Unicode); chế độ Encode/Decode (mặc định Encode, Result live theo Input); Input trái / Result phải; Copy, Clear, Swap ⇄, Focus.</li>
               <li>Ẩn/hiện <strong>Sidebar</strong> (nút « / », Settings); lưu <code>localStorage</code> key <code>sidebar</code>; mặc định Show. Reset all khôi phục Show.</li>
               <li>Markdown Reader — Side by side: kéo thanh giữa để đổi độ rộng editor / preview (mặc định 50/50; không lưu vị trí).</li>
             </ul>
@@ -445,6 +542,8 @@
   <div class="toast" id="toast"></div>
   <!-- marked.js: render Markdown sang HTML cho Markdown Reader tool -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- crypto-js: MD5 / SHA1 / SHA3 / SHA256 / SHA512 cho Encode / Decode -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

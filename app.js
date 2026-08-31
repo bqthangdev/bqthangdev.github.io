@@ -10,6 +10,7 @@
      7. Markdown Reader — đọc và render file Markdown
      8. Settings       — quản lý localStorage của tool
      9. Case Converter   — chuyển đổi text sang nhiều định dạng case
+    10. Encode / Decode  — Unicode + hash (MD5 / SHA*)
 ═══════════════════════════════════════════════════════════════ */
 
 
@@ -528,8 +529,244 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 
+  /* ─── ENCODE / DECODE ──────────────────────────────────────────
+     Unicode escape + hash (MD5/SHA* qua crypto-js).
+     Chế độ Encode|Decode (mặc định Encode); Result cập nhật live theo Input.
+  ─────────────────────────────────────────────────────────────────── */
+  const edPage     = document.getElementById('page-encode-decode');
+  const edInput    = document.getElementById('ed-input');
+  const edResult   = document.getElementById('ed-result');
+  const edCodec    = document.getElementById('ed-codec');
+  const edEncodeBtn = document.getElementById('ed-encode');
+  const edDecodeBtn = document.getElementById('ed-decode');
+  const edFocusToggle = document.getElementById('ed-focus-toggle');
+  const settingsEdCodec = document.getElementById('settings-ed-codec');
+  const settingsEdModeBtns = document.querySelectorAll('.settings-ed-mode');
+  const settingsEdFocusBtns = document.querySelectorAll('.settings-ed-focus');
+
+  const ED_STORAGE_PREFIX = 'devtools:encode-decode:';
+  const ED_CODEC_KEY = ED_STORAGE_PREFIX + 'codec';
+  const ED_MODE_KEY = ED_STORAGE_PREFIX + 'mode';
+  const ED_FOCUS_MODE_KEY = ED_STORAGE_PREFIX + 'focus-mode';
+  const ED_CODEC_IDS = ['unicode', 'md5', 'sha1', 'sha3-256', 'sha3-512', 'sha256', 'sha512'];
+
+  const edNormalizeCodec = value => {
+    if (value === 'sha3') return 'sha3-256'; /* migrate key cũ */
+    return ED_CODEC_IDS.includes(value) ? value : 'unicode';
+  };
+  /* Mặc định encode khi chưa có key */
+  let edMode = localStorage.getItem(ED_MODE_KEY) === 'decode' ? 'decode' : 'encode';
+  let edFocusEnabled = localStorage.getItem(ED_FOCUS_MODE_KEY) === 'true';
+
+  /* Unicode → \uXXXX (BMP / surrogate pair) */
+  const edUnicodeEncode = str =>
+    Array.from(str).map(ch => {
+      const cp = ch.codePointAt(0);
+      if (cp > 0xffff) {
+        const h = Math.floor((cp - 0x10000) / 0x400) + 0xd800;
+        const l = ((cp - 0x10000) % 0x400) + 0xdc00;
+        return '\\u' + h.toString(16).padStart(4, '0') + '\\u' + l.toString(16).padStart(4, '0');
+      }
+      return '\\u' + cp.toString(16).padStart(4, '0');
+    }).join('');
+
+  /* \uXXXX / \u{...} → text */
+  const edUnicodeDecode = str => {
+    try {
+      return str.replace(/\\u\{([0-9a-fA-F]+)\}|\\u([0-9a-fA-F]{4})/g, (_, brace, quad) => {
+        const hex = brace || quad;
+        return String.fromCodePoint(parseInt(hex, 16));
+      });
+    } catch (_) {
+      return null;
+    }
+  };
+
+  const edHashHex = (algo, text) => {
+    if (typeof CryptoJS === 'undefined') {
+      showToast('Crypto library failed to load.');
+      return null;
+    }
+    switch (algo) {
+      case 'md5':    return CryptoJS.MD5(text).toString();
+      case 'sha1':   return CryptoJS.SHA1(text).toString();
+      case 'sha256': return CryptoJS.SHA256(text).toString();
+      case 'sha512': return CryptoJS.SHA512(text).toString();
+      case 'sha3-256': return CryptoJS.SHA3(text, { outputLength: 256 }).toString();
+      case 'sha3-512': return CryptoJS.SHA3(text, { outputLength: 512 }).toString();
+      default:       return null;
+    }
+  };
+
+  const ED_MAX_BYTES = 256 * 1024; /* 256 KB (UTF-8) */
+  const ED_DEBOUNCE_MS = 150;
+  const edTextEncoder = new TextEncoder();
+  let edConvertTimer = null;
+  let edLimitToastAt = 0;
+
+  const edByteLength = str => edTextEncoder.encode(str).length;
+
+  /* Cắt chuỗi theo giới hạn UTF-8 bytes (binary search) */
+  const edClampToMaxBytes = str => {
+    if (edByteLength(str) <= ED_MAX_BYTES) return str;
+    let lo = 0;
+    let hi = str.length;
+    while (lo < hi) {
+      const mid = Math.ceil((lo + hi) / 2);
+      if (edByteLength(str.slice(0, mid)) <= ED_MAX_BYTES) lo = mid;
+      else hi = mid - 1;
+    }
+    return str.slice(0, lo);
+  };
+
+  const edEnforceInputLimit = () => {
+    const raw = edInput.value;
+    if (edByteLength(raw) <= ED_MAX_BYTES) return false;
+    const start = edInput.selectionStart;
+    const end = edInput.selectionEnd;
+    edInput.value = edClampToMaxBytes(raw);
+    const pos = Math.min(edInput.value.length, start, end);
+    edInput.setSelectionRange(pos, pos);
+    const now = Date.now();
+    if (now - edLimitToastAt > 2000) {
+      edLimitToastAt = now;
+      showToast('Input limited to 256 KB.');
+    }
+    return true;
+  };
+
+  const edGetCodec = () => edNormalizeCodec(edCodec.value);
+
+  /* Cập nhật Result ngay (đổi mode/codec / init) */
+  const edConvertNow = () => {
+    const text = edInput.value;
+    if (!text) {
+      edResult.value = '';
+      return;
+    }
+    const codec = edGetCodec();
+    if (edMode === 'decode') {
+      if (codec !== 'unicode') {
+        edResult.value = '';
+        return;
+      }
+      const out = edUnicodeDecode(text);
+      edResult.value = out == null ? '' : out;
+      return;
+    }
+    if (codec === 'unicode') {
+      edResult.value = edUnicodeEncode(text);
+      return;
+    }
+    const hex = edHashHex(codec, text);
+    if (hex != null) edResult.value = hex;
+  };
+
+  /* Debounce khi gõ / paste — giảm nghẽn UI */
+  const edScheduleConvert = () => {
+    clearTimeout(edConvertTimer);
+    edConvertTimer = setTimeout(edConvertNow, ED_DEBOUNCE_MS);
+  };
+
+  const edApplyModeControls = () => {
+    edEncodeBtn.classList.toggle('active', edMode === 'encode');
+    edDecodeBtn.classList.toggle('active', edMode === 'decode');
+    settingsEdModeBtns.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.settingsEdMode === edMode);
+    });
+  };
+
+  const edApplyCodecUI = codec => {
+    const id = edNormalizeCodec(codec);
+    edCodec.value = id;
+    if (settingsEdCodec) settingsEdCodec.value = id;
+    /* Hash một chiều — Decode chỉ hữu ích với Unicode */
+    edDecodeBtn.disabled = id !== 'unicode';
+    settingsEdModeBtns.forEach(btn => {
+      if (btn.dataset.settingsEdMode === 'decode') btn.disabled = id !== 'unicode';
+    });
+  };
+
+  const edApplyFocusControls = () => {
+    edFocusToggle.textContent = edFocusEnabled ? 'Focus: On' : 'Focus: Off';
+    edFocusToggle.classList.toggle('active', edFocusEnabled);
+    edPage.classList.toggle('ed-focus', edFocusEnabled);
+  };
+
+  const edSetMode = mode => {
+    const next = mode === 'decode' ? 'decode' : 'encode';
+    if (next === 'decode' && edGetCodec() !== 'unicode') {
+      showToast('This algorithm is one-way and cannot be decoded.');
+      return;
+    }
+    edMode = next;
+    localStorage.setItem(ED_MODE_KEY, edMode);
+    edApplyModeControls();
+    edConvertNow(); /* Đổi chế độ: giữ nội dung, chỉ tính lại Result */
+  };
+
+  const edSetCodec = codec => {
+    const id = edNormalizeCodec(codec);
+    localStorage.setItem(ED_CODEC_KEY, id);
+    edApplyCodecUI(id);
+    /* Hash không decode được — về Encode nếu đang Decode */
+    if (id !== 'unicode' && edMode === 'decode') {
+      edMode = 'encode';
+      localStorage.setItem(ED_MODE_KEY, 'encode');
+      edApplyModeControls();
+    }
+    edConvertNow();
+  };
+
+  edApplyCodecUI(localStorage.getItem(ED_CODEC_KEY));
+  /* Hash + mode decode đã lưu → về encode */
+  if (edGetCodec() !== 'unicode' && edMode === 'decode') {
+    edMode = 'encode';
+    localStorage.setItem(ED_MODE_KEY, 'encode');
+  }
+  edApplyModeControls();
+  edApplyFocusControls();
+  edConvertNow();
+
+  edCodec.addEventListener('change', () => edSetCodec(edCodec.value));
+  edInput.addEventListener('input', () => {
+    edEnforceInputLimit();
+    edScheduleConvert();
+  });
+
+  edEncodeBtn.addEventListener('click', () => edSetMode('encode'));
+  edDecodeBtn.addEventListener('click', () => edSetMode('decode'));
+
+  document.getElementById('ed-copy').addEventListener('click', () => {
+    if (!edResult.value) return;
+    copyToClipboard(edResult.value, 'Copied!');
+  });
+
+  document.getElementById('ed-clear').addEventListener('click', () => {
+    edInput.value = '';
+    edResult.value = '';
+  });
+
+  /* Swap nội dung + đảo chế độ Encode↔Decode (đồng bộ như Google Translate) */
+  document.getElementById('ed-swap').addEventListener('click', () => {
+    const a = edInput.value;
+    edInput.value = edResult.value;
+    edResult.value = a;
+    edEnforceInputLimit(); /* Result Unicode có thể > 256 KB */
+    const next = edMode === 'encode' ? 'decode' : 'encode';
+    /* Hash một chiều: chỉ swap nội dung, giữ Encode */
+    if (next === 'decode' && edGetCodec() !== 'unicode') return;
+    edSetMode(next); /* đổi mode + convert lại (Unicode: Result khớp phía vừa swap) */
+  });
+
+  edFocusToggle.addEventListener('click', () => {
+    edFocusEnabled = !edFocusEnabled;
+    localStorage.setItem(ED_FOCUS_MODE_KEY, edFocusEnabled ? 'true' : 'false');
+    edApplyFocusControls();
+  });
+
   /* ─── SETTINGS ─────────────────────────────────────────────────
-     Quản lý localStorage: Theme + các tool có lưu cài đặt (Markdown Reader).
+     Quản lý localStorage: Theme + Sidebar + Markdown Reader + Encode/Decode.
   ─────────────────────────────────────────────────────────────────── */
   const settingsMrViewBtns = document.querySelectorAll('.settings-mr-view');
   const settingsMrSyncBtns = document.querySelectorAll('.settings-mr-sync');
@@ -571,6 +808,19 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.classList.toggle('active', (btn.dataset.settingsMrMemory === 'on') === memOn);
     });
     settingsMrMemoryClear.disabled = !memOn;
+
+    if (settingsEdCodec) settingsEdCodec.value = edNormalizeCodec(localStorage.getItem(ED_CODEC_KEY));
+    const edModeSaved = localStorage.getItem(ED_MODE_KEY) === 'decode' ? 'decode' : 'encode';
+    settingsEdModeBtns.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.settingsEdMode === edModeSaved);
+      if (btn.dataset.settingsEdMode === 'decode') {
+        btn.disabled = edNormalizeCodec(localStorage.getItem(ED_CODEC_KEY)) !== 'unicode';
+      }
+    });
+    const edFocusOn = localStorage.getItem(ED_FOCUS_MODE_KEY) === 'true';
+    settingsEdFocusBtns.forEach(btn => {
+      btn.classList.toggle('active', (btn.dataset.settingsEdFocus === 'on') === edFocusOn);
+    });
   };
 
   /* Xóa toàn bộ key localStorage của Markdown Reader → về mặc định */
@@ -580,6 +830,12 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.removeItem(MR_FOCUS_MODE_KEY);
     localStorage.removeItem(MR_MEMORY_MODE_KEY);
     mrClearMemoryContent();
+  };
+
+  const resetEncodeDecodeSettings = () => {
+    localStorage.removeItem(ED_CODEC_KEY);
+    localStorage.removeItem(ED_MODE_KEY);
+    localStorage.removeItem(ED_FOCUS_MODE_KEY);
   };
 
   settingsThemeBtns.forEach(btn => {
@@ -634,9 +890,35 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshSettingsUI();
   });
 
+  if (settingsEdCodec) {
+    settingsEdCodec.addEventListener('change', () => {
+      edSetCodec(settingsEdCodec.value);
+      refreshSettingsUI();
+    });
+  }
+
+  settingsEdModeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const want = btn.dataset.settingsEdMode === 'decode' ? 'decode' : 'encode';
+      if (edMode === want) return;
+      edSetMode(want);
+      refreshSettingsUI();
+    });
+  });
+
+  settingsEdFocusBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const wantOn = btn.dataset.settingsEdFocus === 'on';
+      if (edFocusEnabled === wantOn) return;
+      edFocusToggle.click();
+      refreshSettingsUI();
+    });
+  });
+
   document.getElementById('settings-reset-all').addEventListener('click', () => {
     if (!confirm('Reset all settings to defaults?')) return;
     resetMarkdownReaderSettings();
+    resetEncodeDecodeSettings();
     localStorage.removeItem('theme'); // mặc định: dark
     localStorage.removeItem('sidebar'); // mặc định: show
     location.reload();
