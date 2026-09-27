@@ -611,6 +611,29 @@ body.sidebar-hidden .content { margin-left: 0; }
   flex-wrap: wrap;
   flex-shrink: 0;
 }
+
+/* Below: toolbar giữ đúng chỗ ban đầu (cách mép viewport bằng padding-top của .content).
+   ::before che khoảng phía trên để nội dung không trượt vào khi cuộn. */
+#page-markdown-reader.active:has(.mr-container.mr-below) > .page-header {
+  margin-bottom: 36px;
+}
+#page-markdown-reader.active:has(.mr-container.mr-below) .mr-toolbar {
+  position: sticky;
+  top: 36px;
+  z-index: 5;
+  margin-bottom: 0;
+  padding-bottom: 16px;
+  background: var(--bg);
+}
+#page-markdown-reader.active:has(.mr-container.mr-below) .mr-toolbar::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 36px;
+  background: var(--bg);
+}
 .mr-toolbar-right { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
 
 /* Nút toggle active */
@@ -1170,6 +1193,15 @@ body.mr-splitting .mr-preview { pointer-events: none; }
   .logo { display: none; }
   .sidebar-header { display: none; }
   .content { padding: 24px 16px; }
+  #page-markdown-reader.active:has(.mr-container.mr-below) > .page-header {
+    margin-bottom: 24px;
+  }
+  #page-markdown-reader.active:has(.mr-container.mr-below) .mr-toolbar {
+    top: 24px;
+  }
+  #page-markdown-reader.active:has(.mr-container.mr-below) .mr-toolbar::before {
+    height: 24px;
+  }
   .stats-row { gap: 8px; }
   .stat-value { font-size: 1.4rem; }
   .result-actions { flex-wrap: wrap; }

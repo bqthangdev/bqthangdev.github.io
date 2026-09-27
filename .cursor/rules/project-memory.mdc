@@ -43,11 +43,11 @@ Navigation: `data-page` ↔ `#page-{data-page}`; URL param `tool`; `defaultPage`
 ## Markdown Reader
 
 - View: `mr-split` | `mr-below` trên `#mr-container`; lưu `view-mode` mỗi lần đổi; khôi phục khi load (`mrApplyView`).
-- Below: mặc định `mr-editor-collapsed` (~2 dòng). Click `#mr-editor-toggle` để mở rộng / thu gọn.
+- Below: mặc định `mr-editor-collapsed` (~2 dòng). Click `#mr-editor-toggle` để mở rộng / thu gọn. Toolbar sticky `top` bằng padding-top của `.content` (36px, mobile 24px) — giữ đúng vị trí ban đầu, không dính sát mép viewport. `::before` che khoảng phía trên. Header vẫn cuộn đi.
 - **Sync scroll** (`#mr-sync-toggle`): chỉ hiện / có hiệu lực ở Side by side; đồng bộ tỷ lệ `scrollTop` editor ↔ preview (`mrSyncScrollFrom`); tắt thì mỗi panel cuộn độc lập; lưu `sync-scroll`.
 - **Focus** (`#mr-focus-toggle`, class `mr-focus` trên `#page-markdown-reader`): mặc định Off; On ẩn `.page-header` (Side by side và Below); lưu `focus-mode`.
 - **Split divider** (`#mr-split-divider`): kéo đổi độ rộng editor / preview; mặc định 50/50; **không** lưu localStorage; về 50/50 khi chuyển Below (`mrResetSplitWidths`).
-- **Split layout**: khóa `height`/`max-height` + `overflow: hidden` theo viewport (`100vh − 72px` / mobile `48px`); flex fill cho container; `overscroll-behavior: contain` trên textarea/preview. Không sticky / không cuộn trang.
+- **Split layout**: khóa `height`/`max-height` + `overflow: hidden` theo viewport (`100vh − 72px` / mobile `48px`); flex fill cho container; `overscroll-behavior: contain` trên textarea/preview. Không cuộn trang, không dùng sticky.
 - Editor (`.mr-textarea`): nền `var(--bg-card)` (trắng ở light) — dễ đọc hơn `--bg-card2`.
 - Memory mode: chunked localStorage. Đổi editor qua `dispatchEvent(new Event('input'))`.
 
@@ -70,6 +70,7 @@ Navigation: `data-page` ↔ `#page-{data-page}`; URL param `tool`; `defaultPage`
 
 ## Lịch sử quyết định gần đây
 
+- 2026-09-27: Markdown Reader Below — toolbar sticky theo padding-top `.content` (36px / mobile 24px), không dính sát mép viewport. Header vẫn cuộn. Split không đổi.
 - 2026-08-31: Tool Encode / Decode (Unicode mặc định, hash MD5/SHA*, Focus, Swap, Settings); crypto-js CDN.
 - 2026-08-31: Sidebar show/hide (`sidebar` localStorage, mặc định show); MR split divider kéo độ rộng 50/50 không lưu.
 - 2026-08-30: Sync scroll (mặc định On, 2 chiều); Focus (mặc định Off, ẩn header) ở cả Side by side và Below; editor nền `--bg-card`; split khóa viewport; Settings + `focus-mode`.

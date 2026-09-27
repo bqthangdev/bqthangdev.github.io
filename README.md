@@ -1,40 +1,93 @@
-# DevTools — bqthangdev.github.io
+# DevTools
 
-Trang web tĩnh chạy trên GitHub Pages, tập hợp các tiện ích nhỏ dành cho developer.  
-Không có backend, toàn bộ xử lý chạy trên trình duyệt.
+Bộ công cụ chạy trên trình duyệt cho các thao tác với Markdown, văn bản và ảnh. Trang tĩnh, không có backend: mọi xử lý diễn ra trên máy bạn.
 
-## Chức năng
+## Bắt đầu
 
-| Tính năng | Mô tả |
-|---|---|
-| **Markdown Reader** | Tải lên file `.md` hoặc paste nội dung Markdown; hai chế độ xem (lưu `localStorage`): **Side by side** có Sync scroll hai chiều (mặc định bật) và kéo thanh giữa để đổi độ rộng (mặc định 50/50, không lưu); **Focus** (mặc định tắt) ẩn tiêu đề ở cả hai chế độ; editor nền trắng (light); Memory mode; xuất PDF |
-| **String Length** | Paste chuỗi bất kỳ để xem tổng ký tự, ký tự không kể space, số từ và số dòng |
-| **Image to Base64** | Tải lên một hoặc nhiều ảnh, chuyển đổi sang chuỗi Base64 hoặc Data URL |
-| **Text Compare** | Dán hai đoạn văn bản, so sánh từng dòng và highlight chính xác các ký tự khác nhau |
-| **Case Converter** | Chuyển đổi text sang camelCase, snake_case, PascalCase, kebab-case và 11 định dạng khác |
-| **Encode / Decode** | Unicode escape + hash MD5 / SHA1 / SHA3 (256) / SHA3 (512) / SHA256 / SHA512; dropdown Type (mặc định Unicode); chế độ Encode/Decode (mặc định Encode, đổi mode không xóa nội dung); Result cập nhật live khi gõ/paste; Input trái / Result phải; Copy, Clear, Swap, Focus |
-| **Settings** | Quản lý theme Dark/Light, ẩn/hiện Sidebar, và cài đặt `localStorage` của tool (Markdown Reader, Encode / Decode); nút reset về mặc định |
-| **Changelog** | Nhật ký hiệu chỉnh theo từng lần cập nhật |
-| **About** | Thông tin tác giả |
+Mở bản đã deploy, hoặc mở `index.html` trực tiếp trên trình duyệt. Trong VS Code có thể dùng Live Server.
 
-## Tính năng khác
+Tool đang mở được giữ bằng query `?tool=`. Không có tham số thì trang mở **Markdown Reader**.
 
-- Chuyển đổi giao diện **Dark / Light** (sidebar hoặc Settings), lưu vào `localStorage`
-- Ẩn/hiện **Sidebar** (nút « / », Settings), lưu `localStorage` (mặc định Show)
-- Markdown Reader hỗ trợ **Memory mode** để tự lưu và khôi phục nội dung editor trên cùng trình duyệt
-- Markdown Reader nhớ chế độ xem **Side by side / Below**, **Sync scroll** (chỉ Side by side) và **Focus** (cả hai chế độ) qua `localStorage`
-- Tab **Settings** quản lý theme, sidebar và cài đặt tool (Markdown Reader, Encode / Decode); Memory dùng nút On/Off; Clear saved content làm mờ khi Memory Off
-- Giữ tool đang mở bằng tham số URL `tool`; nếu không có param thì mặc định mở **Markdown Reader**
-- Sidebar có ghi chú nhắc nhấn **Ctrl + F5** khi trang hiển thị lỗi hoặc bất thường
-- Hỗ trợ **drag & drop** ảnh
-- Responsive trên màn hình nhỏ
+Ví dụ: `index.html?tool=encode-decode`
+
+## Giao diện
+
+### Theme
+
+Dark hoặc Light. Đổi ở cuối sidebar, hoặc trong **Settings**. Lựa chọn được lưu trên trình duyệt. Mặc định là Dark.
+
+### Sidebar
+
+Sidebar nằm bên trái. Nút **«** ở giữa mép phải sidebar để ẩn; khi đang ẩn, nút **»** ở giữa mép trái màn hình để hiện lại. Cùng tùy chọn này có trong **Settings**. Mặc định là hiện.
+
+Trên màn hình hẹp, sidebar thu còn cột icon.
+
+## Công cụ
+
+Chọn tool trên sidebar. Mỗi tool có mục **Hướng dẫn sử dụng** ngay trên trang.
+
+### Markdown Reader
+
+Đọc và xem trước Markdown. Tải file `.md` hoặc dán nội dung vào editor. Preview cập nhật khi bạn gõ.
+
+Hai cách bố trí:
+
+- **Side by side** — editor và preview nằm cạnh nhau, vừa chiều cao màn hình. Cuộn chỉ trong từng khung, không cuộn cả trang. **Sync scroll** (mặc định bật) đồng bộ tỷ lệ cuộn hai chiều; tắt thì mỗi khung cuộn riêng. Kéo thanh giữa để đổi độ rộng (mặc định 50/50, không được lưu).
+- **Below** — editor nằm trên preview. Editor mặc định thu gọn khoảng hai dòng; nhấn nhãn **Markdown** để mở rộng hoặc thu gọn. Khi cuộn trang, thanh công cụ giữ nguyên vị trí ban đầu. Tiêu đề trang vẫn cuộn đi.
+
+**Focus** (mặc định tắt) ẩn tiêu đề và hướng dẫn ở cả hai cách bố trí, để chừa chỗ cho editor và preview.
+
+**Memory** lưu nội dung editor trên trình duyệt và khôi phục khi tải lại trang. **Clear memory** xóa bản đã lưu. Khi Memory tắt, nút xóa không dùng được.
+
+**Download .md** tải nội dung editor. **Export PDF** mở hộp thoại in của trình duyệt để xuất preview.
+
+### String Length
+
+Dán hoặc gõ một chuỗi. Trang hiển thị tổng số ký tự, số ký tự không kể khoảng trắng, số từ và số dòng. Số liệu cập nhật khi bạn nhập.
+
+### Image to Base64
+
+Tải một hoặc nhiều ảnh (nhấn vùng upload hoặc kéo thả). Mỗi ảnh có kết quả riêng, dạng chuỗi Base64 hoặc Data URL. Có thể sao chép hoặc tải về file `.txt`.
+
+Định dạng thường gặp: PNG, JPG, GIF, WebP, SVG.
+
+### Text Compare
+
+Dán hai đoạn vào **Text A** và **Text B**, rồi nhấn **Compare**. Kết quả so từng dòng: thêm, xóa, hoặc sửa. Trong dòng sửa, từng ký tự khác nhau được đánh dấu.
+
+### Case Converter
+
+Chuyển từng dòng sang một kiểu chữ. Kết quả hiện ở ô bên phải. Có thể sao chép hoặc xóa.
+
+Các kiểu: lowercase, UPPERCASE, camelCase, Capital Case, CONSTANT_CASE, dot.case, kebab-case, no case, PascalCase, Pascal_Snake_Case, path/case, Sentence case, snake_case, sWAP cASE, Train-Case.
+
+### Encode / Decode
+
+Chuyển văn bản theo loại mã chọn ở **Type**. Mặc định là **Unicode**.
+
+- **Encode** (mặc định) và **Decode** là chế độ làm việc. Đổi chế độ không xóa nội dung. Gõ hoặc dán vào **Input** (trái); **Result** (phải) cập nhật sau một khoảng ngắn.
+- Input tối đa 256 KB (UTF-8). Phần vượt quá bị cắt và có thông báo.
+- Unicode: encode thành `\uXXXX`; decode đọc `\uXXXX` và `\u{...}`.
+- MD5, SHA1, SHA3 (256), SHA3 (512), SHA256, SHA512 chỉ có Encode. Decode bị tắt.
+- **⇄** đổi nội dung hai ô và đảo Encode / Decode. Với hàm băm, chỉ đổi nội dung và giữ Encode.
+- **Focus** ẩn tiêu đề để tăng chiều cao hai ô. Mặc định tắt.
+
+## Settings
+
+**Settings** gom các lựa chọn đang được lưu trên trình duyệt:
+
+- Theme và Sidebar
+- Markdown Reader: cách bố trí, Sync scroll, Focus, Memory
+- Encode / Decode: Type, Encode/Decode, Focus
+
+**Reset all to defaults** xóa các lựa chọn đã lưu và khôi phục mặc định: theme Dark, sidebar hiện, Markdown Reader về Side by side với Sync scroll bật và Focus tắt, Encode / Decode về Unicode, Encode, Focus tắt.
+
+## Nếu trang hiển thị lỗi
+
+Sidebar có ghi chú: nhấn **Ctrl + F5** để tải lại và bỏ bản cache cũ.
 
 ## Công nghệ
 
-- HTML5 / CSS3 / Vanilla JavaScript
-- [marked.js](https://cdn.jsdelivr.net/npm/marked/marked.min.js) — render Markdown (CDN)
-- [crypto-js](https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js) — MD5 / SHA* cho Encode / Decode (CDN)
-
-## Chạy local
-
-Mở trực tiếp `index.html` trên trình duyệt, hoặc dùng Live Server trong VS Code.
+- HTML, CSS, JavaScript (không framework, không bước build)
+- [marked.js](https://cdn.jsdelivr.net/npm/marked/marked.min.js) — render Markdown
+- [crypto-js](https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js) — MD5 và SHA cho Encode / Decode
