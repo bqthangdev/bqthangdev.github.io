@@ -935,35 +935,39 @@ document.addEventListener('DOMContentLoaded', () => {
   const ccInput  = document.getElementById('cc-input');
   const ccOutput = document.getElementById('cc-output');
 
-  /* Tách cỗi thành mảng từ — hiểu camelCase, PascalCase, snake_case, kebab-case, v.v. */
+  const CC_LOCALE = 'vi';
+  const ccLower = s => s.toLocaleLowerCase(CC_LOCALE);
+  const ccUpper = s => s.toLocaleUpperCase(CC_LOCALE);
+
+  /* Tách chuỗi thành từ — giữ chữ tiếng Việt. Hiểu camelCase, PascalCase, snake_case, kebab-case. */
   const ccSplitWords = str =>
     str
-      .replace(/([a-z])([A-Z])/g, '$1 $2')
-      .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
-      .replace(/[^a-zA-Z0-9]+/g, ' ')
+      .replace(/(\p{Ll})(\p{Lu})/gu, '$1 $2')
+      .replace(/(\p{Lu}+)(\p{Lu}\p{Ll})/gu, '$1 $2')
+      .replace(/[^\p{L}\p{N}]+/gu, ' ')
       .trim()
       .split(/\s+/)
       .filter(Boolean);
 
-  /* Capitalize một từ */
-  const ccCap = w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+  /* Viết hoa chữ cái đầu, phần còn lại viết thường */
+  const ccCap = w => w ? ccUpper(w.charAt(0)) + ccLower(w.slice(1)) : '';
 
   /* Bảng ánh xạ tên case → hàm chuyển đổi */
   const ccConverters = {
-    'lowercase':         str => str.toLowerCase(),
-    'UPPERCASE':         str => str.toUpperCase(),
-    'camelCase':         str => { const w = ccSplitWords(str); return w.length ? w[0].toLowerCase() + w.slice(1).map(ccCap).join('') : ''; },
+    'lowercase':         str => ccLower(str),
+    'UPPERCASE':         str => ccUpper(str),
+    'camelCase':         str => { const w = ccSplitWords(str); return w.length ? ccLower(w[0]) + w.slice(1).map(ccCap).join('') : ''; },
     'Capital Case':      str => ccSplitWords(str).map(ccCap).join(' '),
-    'CONSTANT_CASE':     str => ccSplitWords(str).join('_').toUpperCase(),
-    'dot.case':          str => ccSplitWords(str).join('.').toLowerCase(),
-    'kebab-case':        str => ccSplitWords(str).join('-').toLowerCase(),
-    'no case':           str => ccSplitWords(str).join(' ').toLowerCase(),
+    'CONSTANT_CASE':     str => ccUpper(ccSplitWords(str).join('_')),
+    'dot.case':          str => ccLower(ccSplitWords(str).join('.')),
+    'kebab-case':        str => ccLower(ccSplitWords(str).join('-')),
+    'no case':           str => ccLower(ccSplitWords(str).join(' ')),
     'PascalCase':        str => ccSplitWords(str).map(ccCap).join(''),
     'Pascal_Snake_Case': str => ccSplitWords(str).map(ccCap).join('_'),
-    'path/case':         str => ccSplitWords(str).join('/').toLowerCase(),
-    'Sentence case':     str => { const w = ccSplitWords(str); return w.length ? ccCap(w[0]) + (w.length > 1 ? ' ' + w.slice(1).map(s => s.toLowerCase()).join(' ') : '') : ''; },
-    'snake_case':        str => ccSplitWords(str).join('_').toLowerCase(),
-    'sWAP cASE':         str => str.split('').map(c => c === c.toUpperCase() ? c.toLowerCase() : c.toUpperCase()).join(''),
+    'path/case':         str => ccLower(ccSplitWords(str).join('/')),
+    'Sentence case':     str => { const w = ccSplitWords(str); return w.length ? ccCap(w[0]) + (w.length > 1 ? ' ' + w.slice(1).map(ccLower).join(' ') : '') : ''; },
+    'snake_case':        str => ccLower(ccSplitWords(str).join('_')),
+    'sWAP cASE':         str => Array.from(str).map(c => c === ccUpper(c) ? ccLower(c) : ccUpper(c)).join(''),
     'Train-Case':        str => ccSplitWords(str).map(ccCap).join('-'),
   };
 

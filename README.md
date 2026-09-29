@@ -33,7 +33,7 @@ Chọn tool trên sidebar. Mỗi tool có mục **Hướng dẫn sử dụng** n
 Hai cách bố trí:
 
 - **Side by side** — editor và preview nằm cạnh nhau, vừa chiều cao màn hình. Cuộn chỉ trong từng khung, không cuộn cả trang. **Sync scroll** (mặc định bật) đồng bộ tỷ lệ cuộn hai chiều; tắt thì mỗi khung cuộn riêng. Kéo thanh giữa để đổi độ rộng (mặc định 50/50, không được lưu).
-- **Below** — editor nằm trên preview. Editor mặc định thu gọn khoảng hai dòng; nhấn nhãn **Markdown** để mở rộng hoặc thu gọn. Khi cuộn trang, thanh công cụ giữ nguyên vị trí ban đầu. Tiêu đề trang vẫn cuộn đi.
+- **Below** — editor nằm trên preview. Editor mặc định thu gọn khoảng hai dòng; nhấn nhãn **Markdown** để mở rộng hoặc thu gọn. Khi cuộn trang, thanh công cụ giữ nguyên vị trí ban đầu, không dính sát mép màn hình. Tiêu đề trang vẫn cuộn đi.
 
 **Focus** (mặc định tắt) ẩn tiêu đề và hướng dẫn ở cả hai cách bố trí, để chừa chỗ cho editor và preview.
 
@@ -57,7 +57,9 @@ Dán hai đoạn vào **Text A** và **Text B**, rồi nhấn **Compare**. Kết
 
 ### Case Converter
 
-Chuyển từng dòng sang một kiểu chữ. Kết quả hiện ở ô bên phải. Có thể sao chép hoặc xóa.
+Dán văn bản vào ô trái, rồi chọn một kiểu chữ. Mỗi dòng được xử lý riêng. Kết quả hiện ở ô phải. Có thể sao chép hoặc xóa.
+
+Chữ tiếng Việt được giữ nguyên, kể cả dấu và đ. Ví dụ `Xin chào Việt Nam` sang snake_case thành `xin_chào_việt_nam`, sang camelCase thành `xinChàoViệtNam`. Chữ tiếng Anh vẫn đổi như thường (`helloWorld` thành `hello_world`).
 
 Các kiểu: lowercase, UPPERCASE, camelCase, Capital Case, CONSTANT_CASE, dot.case, kebab-case, no case, PascalCase, Pascal_Snake_Case, path/case, Sentence case, snake_case, sWAP cASE, Train-Case.
 

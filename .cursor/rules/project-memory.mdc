@@ -17,7 +17,7 @@ alwaysApply: true
 2. String Length (`string-length`)
 3. Image to Base64 (`image-to-base64`)
 4. Text Compare (`text-compare`)
-5. Case Converter (`case-converter`)
+5. Case Converter (`case-converter`) — tách từ bằng `\p{L}`/`\p{N}` (giữ tiếng Việt, dấu và đ); hoa/thường theo locale `vi`
 6. **Encode / Decode** (`encode-decode`) — Unicode + MD5/SHA*; Input trái / Result phải; Focus
 7. Settings (`settings`) — Appearance (theme + sidebar) + localStorage của tool; **Reset all to defaults** (theme → dark, sidebar → show)
 8. Changelog (`changelog`) — icon ✨ (`.nav-attention`); mỗi entry là `.card.changelog-entry` full-width
@@ -70,6 +70,7 @@ Navigation: `data-page` ↔ `#page-{data-page}`; URL param `tool`; `defaultPage`
 
 ## Lịch sử quyết định gần đây
 
+- 2026-09-29: Case Converter giữ tiếng Việt (dấu và đ) khi tách từ; hoa/thường locale `vi`. ASCII không đổi.
 - 2026-09-27: Markdown Reader Below — toolbar sticky theo padding-top `.content` (36px / mobile 24px), không dính sát mép viewport. Header vẫn cuộn. Split không đổi.
 - 2026-08-31: Tool Encode / Decode (Unicode mặc định, hash MD5/SHA*, Focus, Swap, Settings); crypto-js CDN.
 - 2026-08-31: Sidebar show/hide (`sidebar` localStorage, mặc định show); MR split divider kéo độ rộng 50/50 không lưu.
