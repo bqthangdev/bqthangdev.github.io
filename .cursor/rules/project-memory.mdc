@@ -50,6 +50,7 @@ Navigation: `data-page` ↔ `#page-{data-page}`; URL param `tool`; `defaultPage`
 - **Split layout**: khóa `height`/`max-height` + `overflow: hidden` theo viewport (`100vh − 72px` / mobile `48px`); flex fill cho container; `overscroll-behavior: contain` trên textarea/preview. Không cuộn trang, không dùng sticky.
 - Editor (`.mr-textarea`): nền `var(--bg-card)` (trắng ở light) — dễ đọc hơn `--bg-card2`.
 - Memory mode: chunked localStorage. Đổi editor qua `dispatchEvent(new Event('input'))`.
+- **Export PDF** (`window.print`): `@media print` viền chỉ trên `pre` và inline `code`. Không viền `pre code` — inline nhiều dòng sẽ vẽ gạch ngang từng dòng.
 
 ## Encode / Decode
 
@@ -70,6 +71,7 @@ Navigation: `data-page` ↔ `#page-{data-page}`; URL param `tool`; `defaultPage`
 
 ## Lịch sử quyết định gần đây
 
+- 2026-11-08: Export PDF — bỏ `border` trên `pre code` (gạch ngang từng dòng trong khối ```). Viền khung vẫn ở `pre`.
 - 2026-09-29: Case Converter giữ tiếng Việt (dấu và đ) khi tách từ; hoa/thường locale `vi`. ASCII không đổi.
 - 2026-09-27: Markdown Reader Below — toolbar sticky theo padding-top `.content` (36px / mobile 24px), không dính sát mép viewport. Header vẫn cuộn. Split không đổi.
 - 2026-08-31: Tool Encode / Decode (Unicode mặc định, hash MD5/SHA*, Focus, Swap, Settings); crypto-js CDN.

@@ -1255,6 +1255,14 @@ body.mr-splitting .mr-preview { pointer-events: none; }
   }
 
   #mr-preview a { color: #000; text-decoration: underline; }
+  /* Viền khung pre và inline code. Không viền code trong pre: thẻ inline nhiều dòng sẽ vẽ gạch ngang từng dòng. */
   #mr-preview pre,
-  #mr-preview code { background: #f4f4f4 !important; border: 1px solid #ccc !important; }
+  #mr-preview code {
+    background: #f4f4f4 !important;
+    border: 1px solid #ccc !important;
+  }
+  #mr-preview pre code {
+    background: none !important;
+    border: none !important;
+  }
 }
