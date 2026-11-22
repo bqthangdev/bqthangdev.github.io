@@ -1265,4 +1265,10 @@ body.mr-splitting .mr-preview { pointer-events: none; }
     background: none !important;
     border: none !important;
   }
+  /* In: không cuộn ngang. Dòng dài xuống hàng để không mất chữ và không in thanh scroll. */
+  #mr-preview pre {
+    overflow: visible !important;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
 }
